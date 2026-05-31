@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>模式详情 - 设计模式侦探</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <span class="icon">🔍</span> 设计模式侦探
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="patterns.html" class="active">模式库</a></li>
+        <li><a href="game.html">开始挑战</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="pattern-detail" id="pattern-detail">
+      <p style="text-align:center; padding:4rem; color:var(--text-muted);">加载中...</p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>设计模式侦探 &copy; 2024 — 学习设计模式的互动平台</p>
+  </footer>
+
+  <script src="js/patterns-data.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+    function getCategoryClass(category) {
+      if (category === '创建型') return 'tag-creational';
+      if (category === '结构型') return 'tag-structural';
+      return 'tag-behavioral';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderDetail() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      const pattern = PATTERNS_DATA.find(p => p.id === id);
+
+      if (!pattern) {
+        document.getElementById('pattern-detail').innerHTML =
+          '<p style="text-align:center;padding:4rem;color:var(--text-muted);">未找到该模式，<a href="patterns.html">返回模式库</a></p>';
+        return;
+      }
+
+      document.title = `${pattern.name} - 设计模式侦探`;
+
+      const html = `
+        <div class="detail-header">
+          <a href="patterns.html" style="color:var(--text-muted);font-size:0.9rem;">&larr; 返回模式库</a>
+          <div style="margin-top:1rem;">
+            <span class="category-tag ${getCategoryClass(pattern.category)}">${pattern.category}</span>
+          </div>
+          <h1>${pattern.name}</h1>
+          <div class="name-en">${pattern.nameEn}</div>
+        </div>
+
+        <div class="detail-section">
+          <h2>概念介绍</h2>
+          <p style="color:var(--text-muted);line-height:1.8;">${pattern.description}</p>
+        </div>
+
+        <div class="detail-section">
+          <h2>核心要点</h2>
+          <ul class="key-points">
+            ${pattern.keyPoints.map(point => `<li>${point}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="detail-section">
+          <h2>代码示例</h2>
+          ${pattern.examples.map(example => `
+            <div class="example-block">
+              <h3>${example.title}</h3>
+              <pre><code class="language-javascript">${escapeHtml(example.code)}</code></pre>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="text-align:center;padding:2rem 0;">
+          <a href="game.html" class="btn btn-primary">去挑战试试</a>
+        </div>
+      `;
+
+      document.getElementById('pattern-detail').innerHTML = html;
+      document.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+    }
+
+    renderDetail();
+  </script>
+</body>
+</html>

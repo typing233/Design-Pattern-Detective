@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>设计模式库 - 设计模式侦探</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <span class="icon">🔍</span> 设计模式侦探
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="patterns.html" class="active">模式库</a></li>
+        <li><a href="game.html">开始挑战</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>设计模式库</h1>
+      <p>涵盖 14 种常用 JavaScript 设计模式，点击卡片查看详情与代码示例</p>
+    </div>
+
+    <div class="category-filter" id="category-filter">
+      <button class="filter-btn active" data-category="all">全部</button>
+      <button class="filter-btn" data-category="创建型">创建型</button>
+      <button class="filter-btn" data-category="结构型">结构型</button>
+      <button class="filter-btn" data-category="行为型">行为型</button>
+    </div>
+
+    <div class="pattern-grid" id="pattern-grid"></div>
+  </div>
+
+  <footer class="footer">
+    <p>设计模式侦探 &copy; 2024 — 学习设计模式的互动平台</p>
+  </footer>
+
+  <script src="js/patterns-data.js"></script>
+  <script>
+    function getCategoryClass(category) {
+      if (category === '创建型') return 'tag-creational';
+      if (category === '结构型') return 'tag-structural';
+      return 'tag-behavioral';
+    }
+
+    function renderPatterns(filter = 'all') {
+      const grid = document.getElementById('pattern-grid');
+      const patterns = filter === 'all'
+        ? PATTERNS_DATA
+        : PATTERNS_DATA.filter(p => p.category === filter);
+
+      grid.innerHTML = patterns.map(p => `
+        <a href="pattern-detail.html?id=${p.id}" class="pattern-card">
+          <span class="category-tag ${getCategoryClass(p.category)}">${p.category}</span>
+          <h3>${p.name}</h3>
+          <div class="name-en">${p.nameEn}</div>
+          <p class="desc">${p.description}</p>
+        </a>
+      `).join('');
+    }
+
+    document.getElementById('category-filter').addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-btn')) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        renderPatterns(e.target.dataset.category);
+      }
+    });
+
+    renderPatterns();
+  </script>
+</body>
+</html>

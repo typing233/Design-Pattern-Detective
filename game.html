@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>模式挑战 - 设计模式侦探</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <span class="icon">🔍</span> 设计模式侦探
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="patterns.html">模式库</a></li>
+        <li><a href="game.html" class="active">开始挑战</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="game-container">
+    <!-- Start Screen -->
+    <div class="start-screen" id="start-screen">
+      <h1>模式侦探挑战</h1>
+      <p>阅读代码片段，从4个候选设计模式中选出正确答案。每题10分，看看你能得多少分！</p>
+      <div class="question-count-selector">
+        <label for="question-count">题目数量：</label>
+        <select id="question-count">
+          <option value="5">5 题（快速）</option>
+          <option value="10" selected>10 题（标准）</option>
+          <option value="15">15 题（挑战）</option>
+          <option value="20">20 题（专家）</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="start-btn">开始挑战</button>
+    </div>
+
+    <!-- Game Area -->
+    <div id="game-area" style="display:none;">
+      <!-- Progress -->
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-bar-fill" id="progress-bar-fill" style="width:0%"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="score-display">0</div>
+          <div class="stat-label">得分</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="accuracy-display">0%</div>
+          <div class="stat-label">正确率</div>
+        </div>
+      </div>
+
+      <!-- Question -->
+      <div class="question-header">
+        <h2 id="question-number">第 1/10 题</h2>
+      </div>
+
+      <div class="code-section">
+        <div class="code-header" id="code-title">示例代码</div>
+        <pre><code class="language-javascript" id="code-display"></code></pre>
+      </div>
+
+      <p style="margin-bottom:1rem;color:var(--text-muted);font-size:0.9rem;">请选择这段代码使用的设计模式：</p>
+
+      <div class="options-container" id="options-container"></div>
+
+      <!-- Feedback -->
+      <div class="feedback-area" id="feedback-area">
+        <div class="feedback-header">
+          <span class="feedback-icon" id="feedback-icon"></span>
+          <span class="feedback-title" id="feedback-title"></span>
+        </div>
+        <p class="feedback-explanation" id="feedback-explanation"></p>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn btn-primary" id="submit-btn" disabled>确认答案</button>
+        <button class="btn btn-success" id="next-btn" style="display:none;">下一题</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-area" id="results-area">
+      <div class="results-summary">
+        <h2>挑战完成！</h2>
+        <div class="results-grade" id="final-grade"></div>
+        <div class="results-stats">
+          <div class="stat">
+            <div class="stat-value" id="final-score">0</div>
+            <div class="stat-label">总分</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="final-correct">0/0</div>
+            <div class="stat-label">正确数</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="final-accuracy">0%</div>
+            <div class="stat-label">正确率</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-actions">
+        <button class="btn btn-primary" id="play-again-btn">再来一局</button>
+        <a href="patterns.html" class="btn btn-secondary">复习模式</a>
+      </div>
+
+      <div class="history-section">
+        <h3>答题详情</h3>
+        <div class="history-list" id="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/patterns-data.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
