@@ -41,13 +41,34 @@
 
       <div id="free-mode-content" style="display:none;">
         <div class="free-mode-section">
-          <label for="question-count" style="color:var(--text-muted);">题目数量：</label>
-          <select id="question-count">
-            <option value="5">5 题（快速）</option>
-            <option value="10" selected>10 题（标准）</option>
-            <option value="15">15 题（挑战）</option>
-            <option value="20">20 题（全部）</option>
-          </select>
+          <div class="filter-group">
+            <label class="filter-label">模式分类：</label>
+            <div class="filter-bar compact" id="game-category-filter">
+              <button class="filter-btn active" data-value="all">全部</button>
+              <button class="filter-btn" data-value="创建型">创建型</button>
+              <button class="filter-btn" data-value="结构型">结构型</button>
+              <button class="filter-btn" data-value="行为型">行为型</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">难度范围：</label>
+            <div class="filter-bar compact" id="game-difficulty-filter">
+              <button class="filter-btn active" data-value="all">全部</button>
+              <button class="filter-btn" data-value="1">简单</button>
+              <button class="filter-btn" data-value="2">中等</button>
+              <button class="filter-btn" data-value="3">困难</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="question-count">题目数量：</label>
+            <select id="question-count">
+              <option value="5">5 题（快速）</option>
+              <option value="10" selected>10 题（标准）</option>
+              <option value="15">15 题（挑战）</option>
+              <option value="20">20 题（全部）</option>
+            </select>
+          </div>
+          <p class="filter-hint" id="filter-hint"></p>
           <button class="btn btn-primary" id="free-mode-btn">开始自由练习</button>
         </div>
       </div>
@@ -166,6 +187,51 @@
       document.getElementById('level-mode-content').style.display = mode === 'level' ? 'block' : 'none';
       document.getElementById('free-mode-content').style.display = mode === 'free' ? 'block' : 'none';
     });
+
+    // Filter logic for free mode
+    function getSelectedFilter(containerId) {
+      const active = document.querySelector(`#${containerId} .filter-btn.active`);
+      return active ? active.dataset.value : 'all';
+    }
+
+    function countAvailableQuestions() {
+      const cat = getSelectedFilter('game-category-filter');
+      const diff = getSelectedFilter('game-difficulty-filter');
+      let count = 0;
+      PATTERNS_DATA.forEach(p => {
+        if (cat !== 'all' && p.category !== cat) return;
+        p.examples.forEach(ex => {
+          const d = ex.difficulty || p.difficulty;
+          if (diff !== 'all' && d !== parseInt(diff)) return;
+          count++;
+        });
+      });
+      return count;
+    }
+
+    function updateFilterHint() {
+      const available = countAvailableQuestions();
+      const hint = document.getElementById('filter-hint');
+      hint.textContent = `当前筛选范围共 ${available} 道题可用`;
+      hint.style.color = available === 0 ? 'var(--danger)' : 'var(--text-muted)';
+      document.getElementById('free-mode-btn').disabled = available === 0;
+    }
+
+    document.getElementById('game-category-filter').addEventListener('click', (e) => {
+      if (!e.target.classList.contains('filter-btn')) return;
+      document.querySelectorAll('#game-category-filter .filter-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      updateFilterHint();
+    });
+
+    document.getElementById('game-difficulty-filter').addEventListener('click', (e) => {
+      if (!e.target.classList.contains('filter-btn')) return;
+      document.querySelectorAll('#game-difficulty-filter .filter-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      updateFilterHint();
+    });
+
+    updateFilterHint();
   </script>
 </body>
 </html>

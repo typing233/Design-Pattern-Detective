@@ -39,23 +39,29 @@ class PatternGame {
         this.mode = 'level';
         this.timerDuration = lvl.timer;
         this.hideTitle = lvl.hideTitle;
-        this.questions = this.generateQuestions(lvl.questions, lvl.difficulty);
+        this.questions = this.generateQuestions(lvl.questions, { difficulties: lvl.difficulty });
       }
     } else {
       this.mode = 'free';
       this.timerDuration = options.timer || 30;
       this.hideTitle = false;
-      this.questions = this.generateQuestions(options.count || 10);
+      this.questions = this.generateQuestions(options.count || 10, {
+        difficulties: options.difficulties || null,
+        categories: options.categories || null
+      });
     }
     this.totalQuestions = this.questions.length;
     this.currentQuestion = this.questions[0];
   }
 
-  generateQuestions(count, difficulties = null) {
+  generateQuestions(count, filters = {}) {
+    const { difficulties, categories } = filters;
     const allQuestions = [];
     PATTERNS_DATA.forEach(pattern => {
+      if (categories && !categories.includes(pattern.category)) return;
       pattern.examples.forEach((example, idx) => {
-        if (difficulties && !difficulties.includes(example.difficulty || pattern.difficulty)) return;
+        const d = example.difficulty || pattern.difficulty;
+        if (difficulties && !difficulties.includes(d)) return;
         allQuestions.push({
           id: `${pattern.id}-${idx}`,
           code: example.code,
@@ -64,7 +70,7 @@ class PatternGame {
           correctName: pattern.name,
           explanation: pattern.description,
           category: pattern.category,
-          difficulty: example.difficulty || pattern.difficulty
+          difficulty: d
         });
       });
     });
@@ -184,8 +190,8 @@ class GameUI {
     this.beginGame();
   }
 
-  startFree(count = 10) {
-    this.game.init({ count });
+  startFree(count = 10, filters = {}) {
+    this.game.init({ count, ...filters });
     this.beginGame();
   }
 
@@ -471,7 +477,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('free-mode-btn')?.addEventListener('click', () => {
     const count = parseInt(document.getElementById('question-count')?.value || '10');
-    gameUI.startFree(count);
+    const catBtn = document.querySelector('#game-category-filter .filter-btn.active');
+    const diffBtn = document.querySelector('#game-difficulty-filter .filter-btn.active');
+    const catVal = catBtn ? catBtn.dataset.value : 'all';
+    const diffVal = diffBtn ? diffBtn.dataset.value : 'all';
+
+    const filters = {};
+    if (catVal !== 'all') filters.categories = [catVal];
+    if (diffVal !== 'all') filters.difficulties = [parseInt(diffVal)];
+
+    gameUI.startFree(count, filters);
   });
 
   document.getElementById('submit-btn')?.addEventListener('click', () => gameUI.submit());
