@@ -1,0 +1,10 @@
+{
+  "name": "设计模式侦探",
+  "short_name": "模式侦探",
+  "description": "通过互动游戏学习 JavaScript 设计模式",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0f0f23",
+  "theme_color": "#6c5ce7",
+  "icons": []
+}

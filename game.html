@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="设计模式侦探挑战 - 阅读代码片段识别设计模式，闯关挑战或自由练习，倒计时答题，连击加分。">
   <title>模式挑战 - 设计模式侦探</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 </head>
 <body>
   <nav class="navbar">
@@ -13,10 +14,12 @@
       <a href="index.html" class="nav-brand">
         <span class="icon">🔍</span> 设计模式侦探
       </a>
-      <ul class="nav-links">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <ul class="nav-links" id="nav-links">
         <li><a href="index.html">首页</a></li>
         <li><a href="patterns.html">模式库</a></li>
         <li><a href="game.html" class="active">开始挑战</a></li>
+        <li><a href="stats.html">战绩</a></li>
       </ul>
     </div>
   </nav>
@@ -25,22 +28,42 @@
     <!-- Start Screen -->
     <div class="start-screen" id="start-screen">
       <h1>模式侦探挑战</h1>
-      <p>阅读代码片段，从4个候选设计模式中选出正确答案。每题10分，看看你能得多少分！</p>
-      <div class="question-count-selector">
-        <label for="question-count">题目数量：</label>
-        <select id="question-count">
-          <option value="5">5 题（快速）</option>
-          <option value="10" selected>10 题（标准）</option>
-          <option value="15">15 题（挑战）</option>
-          <option value="20">20 题（专家）</option>
-        </select>
+      <p>阅读代码片段，从4个候选设计模式中选出正确答案。连击答对获得高倍加成！</p>
+
+      <div class="mode-tabs" id="mode-tabs">
+        <button class="mode-tab active" data-mode="level">闯关模式</button>
+        <button class="mode-tab" data-mode="free">自由模式</button>
       </div>
-      <button class="btn btn-primary" id="start-btn">开始挑战</button>
+
+      <div id="level-mode-content">
+        <div class="level-select" id="level-select"></div>
+      </div>
+
+      <div id="free-mode-content" style="display:none;">
+        <div class="free-mode-section">
+          <label for="question-count" style="color:var(--text-muted);">题目数量：</label>
+          <select id="question-count">
+            <option value="5">5 题（快速）</option>
+            <option value="10" selected>10 题（标准）</option>
+            <option value="15">15 题（挑战）</option>
+            <option value="20">20 题（全部）</option>
+          </select>
+          <button class="btn btn-primary" id="free-mode-btn">开始自由练习</button>
+        </div>
+      </div>
     </div>
 
     <!-- Game Area -->
     <div id="game-area" style="display:none;">
-      <!-- Progress -->
+      <div class="timer-section">
+        <div class="timer-bar" id="timer-bar">
+          <div class="timer-bar-fill" id="timer-bar-fill"></div>
+        </div>
+        <div class="timer-text" id="timer-text">30s</div>
+      </div>
+
+      <div class="combo-display" id="combo-display"></div>
+
       <div class="progress-section">
         <div class="progress-bar">
           <div class="progress-bar-fill" id="progress-bar-fill" style="width:0%"></div>
@@ -53,9 +76,12 @@
           <div class="stat-value" id="accuracy-display">0%</div>
           <div class="stat-label">正确率</div>
         </div>
+        <div class="stat">
+          <div class="stat-value" id="streak-display">0</div>
+          <div class="stat-label">连击</div>
+        </div>
       </div>
 
-      <!-- Question -->
       <div class="question-header">
         <h2 id="question-number">第 1/10 题</h2>
       </div>
@@ -69,7 +95,6 @@
 
       <div class="options-container" id="options-container"></div>
 
-      <!-- Feedback -->
       <div class="feedback-area" id="feedback-area">
         <div class="feedback-header">
           <span class="feedback-icon" id="feedback-icon"></span>
@@ -78,7 +103,6 @@
         <p class="feedback-explanation" id="feedback-explanation"></p>
       </div>
 
-      <!-- Actions -->
       <div class="actions">
         <button class="btn btn-primary" id="submit-btn" disabled>确认答案</button>
         <button class="btn btn-success" id="next-btn" style="display:none;">下一题</button>
@@ -90,6 +114,7 @@
       <div class="results-summary">
         <h2>挑战完成！</h2>
         <div class="results-grade" id="final-grade"></div>
+        <p id="unlock-message"></p>
         <div class="results-stats">
           <div class="stat">
             <div class="stat-value" id="final-score">0</div>
@@ -103,12 +128,17 @@
             <div class="stat-value" id="final-accuracy">0%</div>
             <div class="stat-label">正确率</div>
           </div>
+          <div class="stat">
+            <div class="stat-value" id="final-streak">0</div>
+            <div class="stat-label">最佳连击</div>
+          </div>
         </div>
       </div>
 
       <div class="results-actions">
         <button class="btn btn-primary" id="play-again-btn">再来一局</button>
         <a href="patterns.html" class="btn btn-secondary">复习模式</a>
+        <a href="stats.html" class="btn btn-secondary">查看战绩</a>
       </div>
 
       <div class="history-section">
@@ -119,7 +149,23 @@
   </div>
 
   <script src="js/patterns-data.js"></script>
+  <script src="js/progress.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="js/game.js"></script>
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('nav-links').classList.toggle('open');
+    });
+
+    document.getElementById('mode-tabs').addEventListener('click', (e) => {
+      const tab = e.target.closest('.mode-tab');
+      if (!tab) return;
+      document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const mode = tab.dataset.mode;
+      document.getElementById('level-mode-content').style.display = mode === 'level' ? 'block' : 'none';
+      document.getElementById('free-mode-content').style.display = mode === 'free' ? 'block' : 'none';
+    });
+  </script>
 </body>
 </html>

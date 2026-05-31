@@ -4,6 +4,7 @@ const PATTERNS_DATA = [
     name: "单例模式",
     nameEn: "Singleton",
     category: "创建型",
+    difficulty: 1,
     description:
       "单例模式确保一个类只有一个实例，并提供一个全局访问点。它适用于需要全局唯一对象的场景，如配置管理器、日志记录器、数据库连接池等。单例模式通过将构造函数私有化，控制实例的创建过程，避免重复实例化带来的资源浪费。",
     keyPoints: [
@@ -14,6 +15,7 @@ const PATTERNS_DATA = [
     examples: [
       {
         title: "基础单例 - 配置管理器",
+        difficulty: 1,
         code: `class ConfigManager {
   constructor() {
     if (ConfigManager.instance) {
@@ -40,6 +42,7 @@ console.log(config1 === config2); // true`,
       },
       {
         title: "闭包实现单例 - 数据库连接",
+        difficulty: 1,
         code: `const Database = (() => {
   let instance = null;
 
@@ -73,8 +76,7 @@ console.log(config1 === config2); // true`,
 
 const db1 = Database.getInstance('mongodb://localhost');
 const db2 = Database.getInstance('mongodb://other-host');
-console.log(db1 === db2); // true
-console.log(db2.url); // 'mongodb://localhost'`,
+console.log(db1 === db2); // true`,
       },
     ],
   },
@@ -83,6 +85,7 @@ console.log(db2.url); // 'mongodb://localhost'`,
     name: "工厂模式",
     nameEn: "Factory Method",
     category: "创建型",
+    difficulty: 1,
     description:
       "工厂模式定义一个创建对象的接口，让子类决定实例化哪一个类。它将对象的创建逻辑封装在工厂方法中，使代码不依赖于具体类的构造函数，提高了灵活性和可扩展性。当新增产品类型时，只需添加对应的工厂方法，无需修改已有代码。",
     keyPoints: [
@@ -93,14 +96,13 @@ console.log(db2.url); // 'mongodb://localhost'`,
     examples: [
       {
         title: "简单工厂 - UI组件创建",
+        difficulty: 1,
         code: `class Button {
   constructor(text) {
     this.text = text;
     this.type = 'button';
   }
-  render() {
-    return \`<button>\${this.text}</button>\`;
-  }
+  render() { return \`<button>\${this.text}</button>\`; }
 }
 
 class Input {
@@ -108,9 +110,7 @@ class Input {
     this.placeholder = placeholder;
     this.type = 'input';
   }
-  render() {
-    return \`<input placeholder="\${this.placeholder}" />\`;
-  }
+  render() { return \`<input placeholder="\${this.placeholder}" />\`; }
 }
 
 class Select {
@@ -136,49 +136,50 @@ class UIFactory {
 }
 
 const btn = UIFactory.create('button', { text: '提交' });
-const input = UIFactory.create('input', { placeholder: '请输入' });
-console.log(btn.render());
-console.log(input.render());`,
+const input = UIFactory.create('input', { placeholder: '请输入...' });
+console.log(btn.render());`,
       },
       {
-        title: "工厂方法 - 物流运输",
-        code: `class Transport {
-  deliver() {
-    throw new Error('Must implement deliver()');
+        title: "工厂方法 - 通知系统",
+        difficulty: 1,
+        code: `class Notification {
+  send(message) { throw new Error('Must implement send()'); }
+}
+
+class EmailNotification extends Notification {
+  send(message) {
+    return \`发送邮件: \${message}\`;
   }
 }
 
-class Truck extends Transport {
-  deliver() {
-    return '通过陆运卡车配送货物';
+class SMSNotification extends Notification {
+  send(message) {
+    return \`发送短信: \${message}\`;
   }
 }
 
-class Ship extends Transport {
-  deliver() {
-    return '通过海运轮船配送货物';
+class PushNotification extends Notification {
+  send(message) {
+    return \`推送通知: \${message}\`;
   }
 }
 
-class Airplane extends Transport {
-  deliver() {
-    return '通过空运飞机配送货物';
+class NotificationFactory {
+  create(type) {
+    const factories = {
+      email: () => new EmailNotification(),
+      sms: () => new SMSNotification(),
+      push: () => new PushNotification(),
+    };
+    const factory = factories[type];
+    if (!factory) throw new Error(\`Unknown: \${type}\`);
+    return factory();
   }
 }
 
-class LogisticsFactory {
-  createTransport(distance) {
-    if (distance < 500) return new Truck();
-    if (distance < 5000) return new Ship();
-    return new Airplane();
-  }
-}
-
-const logistics = new LogisticsFactory();
-const t1 = logistics.createTransport(100);
-const t2 = logistics.createTransport(3000);
-console.log(t1.deliver()); // 陆运
-console.log(t2.deliver()); // 海运`,
+const factory = new NotificationFactory();
+const notifier = factory.create('email');
+console.log(notifier.send('你好！'));`,
       },
     ],
   },
@@ -187,88 +188,90 @@ console.log(t2.deliver()); // 海运`,
     name: "抽象工厂模式",
     nameEn: "Abstract Factory",
     category: "创建型",
+    difficulty: 2,
     description:
-      "抽象工厂模式提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们的具体类。它用于生产'产品族'，确保同一族的产品之间相互兼容。例如跨平台UI框架中，不同平台有不同的按钮、输入框实现，但同一平台的组件风格统一。",
+      "抽象工厂模式提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们具体的类。它适用于需要创建一组配套产品的场景，确保产品之间的兼容性。",
     keyPoints: [
       "创建一系列相关对象",
-      "保证产品族的一致性",
-      "切换整个产品族只需更换工厂",
+      "确保产品族之间的一致性",
+      "易于切换产品族",
     ],
     examples: [
       {
-        title: "跨平台UI工厂",
-        code: `class MacButton {
-  render() { return '[Mac风格按钮]'; }
+        title: "UI主题工厂",
+        difficulty: 2,
+        code: `class DarkButton {
+  render() { return '<button class="dark-btn">Dark Button</button>'; }
+}
+class DarkInput {
+  render() { return '<input class="dark-input" />'; }
+}
+class LightButton {
+  render() { return '<button class="light-btn">Light Button</button>'; }
+}
+class LightInput {
+  render() { return '<input class="light-input" />'; }
 }
 
-class MacCheckbox {
-  render() { return '[Mac风格复选框]'; }
+class DarkThemeFactory {
+  createButton() { return new DarkButton(); }
+  createInput() { return new DarkInput(); }
 }
 
-class WindowsButton {
-  render() { return '[Windows风格按钮]'; }
+class LightThemeFactory {
+  createButton() { return new LightButton(); }
+  createInput() { return new LightInput(); }
 }
 
-class WindowsCheckbox {
-  render() { return '[Windows风格复选框]'; }
-}
-
-class MacUIFactory {
-  createButton() { return new MacButton(); }
-  createCheckbox() { return new MacCheckbox(); }
-}
-
-class WindowsUIFactory {
-  createButton() { return new WindowsButton(); }
-  createCheckbox() { return new WindowsCheckbox(); }
-}
-
-function renderApp(factory) {
+function buildUI(factory) {
   const button = factory.createButton();
-  const checkbox = factory.createCheckbox();
-  return button.render() + ' ' + checkbox.render();
+  const input = factory.createInput();
+  return { button: button.render(), input: input.render() };
 }
 
-const platform = 'mac';
-const factory = platform === 'mac' ? new MacUIFactory() : new WindowsUIFactory();
-console.log(renderApp(factory));`,
+const darkUI = buildUI(new DarkThemeFactory());
+const lightUI = buildUI(new LightThemeFactory());
+console.log(darkUI, lightUI);`,
       },
       {
-        title: "数据库驱动抽象工厂",
-        code: `class MySQLConnection {
-  connect() { return 'MySQL连接已建立'; }
+        title: "跨平台组件工厂",
+        difficulty: 2,
+        code: `class WebDialog {
+  show(msg) { return \`[Web弹窗] \${msg}\`; }
+}
+class WebMenu {
+  render(items) { return \`[Web菜单] \${items.join(' | ')}\`; }
 }
 
-class MySQLQuery {
-  execute(sql) { return \`MySQL执行: \${sql}\`; }
+class MobileDialog {
+  show(msg) { return \`[移动端弹窗] \${msg}\`; }
+}
+class MobileMenu {
+  render(items) { return \`[移动端菜单] \${items.join(', ')}\`; }
 }
 
-class PostgreSQLConnection {
-  connect() { return 'PostgreSQL连接已建立'; }
+class WebUIFactory {
+  createDialog() { return new WebDialog(); }
+  createMenu() { return new WebMenu(); }
 }
 
-class PostgreSQLQuery {
-  execute(sql) { return \`PostgreSQL执行: \${sql}\`; }
+class MobileUIFactory {
+  createDialog() { return new MobileDialog(); }
+  createMenu() { return new MobileMenu(); }
 }
 
-class MySQLFactory {
-  createConnection() { return new MySQLConnection(); }
-  createQuery() { return new MySQLQuery(); }
+function createApp(factory) {
+  const dialog = factory.createDialog();
+  const menu = factory.createMenu();
+  return {
+    alert: (msg) => dialog.show(msg),
+    nav: (items) => menu.render(items)
+  };
 }
 
-class PostgreSQLFactory {
-  createConnection() { return new PostgreSQLConnection(); }
-  createQuery() { return new PostgreSQLQuery(); }
-}
-
-function initDatabase(factory) {
-  const conn = factory.createConnection();
-  const query = factory.createQuery();
-  console.log(conn.connect());
-  console.log(query.execute('SELECT * FROM users'));
-}
-
-initDatabase(new PostgreSQLFactory());`,
+const mobileApp = createApp(new MobileUIFactory());
+console.log(mobileApp.alert('操作成功'));
+console.log(mobileApp.nav(['首页', '设置', '关于']));`,
       },
     ],
   },
@@ -277,26 +280,29 @@ initDatabase(new PostgreSQLFactory());`,
     name: "建造者模式",
     nameEn: "Builder",
     category: "创建型",
+    difficulty: 2,
     description:
-      "建造者模式将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。它适用于需要生成的对象有复杂的内部结构，且构建步骤可能不同的场景。通过链式调用，使对象的创建过程更加清晰和灵活。",
+      "建造者模式将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。它通过分步骤构建对象，允许用户只通过指定复杂对象的类型和内容就可以构建它们。",
     keyPoints: [
       "分步骤构建复杂对象",
-      "相同构建过程可产生不同结果",
       "链式调用提升可读性",
+      "同样的构建过程不同表示",
     ],
     examples: [
       {
         title: "查询构建器",
+        difficulty: 2,
         code: `class QueryBuilder {
-  constructor() {
-    this.table = '';
+  constructor(table) {
+    this.table = table;
     this.conditions = [];
     this.orderFields = [];
     this.limitCount = null;
+    this.selectedFields = ['*'];
   }
 
-  from(table) {
-    this.table = table;
+  select(...fields) {
+    this.selectedFields = fields;
     return this;
   }
 
@@ -305,8 +311,8 @@ initDatabase(new PostgreSQLFactory());`,
     return this;
   }
 
-  orderBy(field, direction = 'ASC') {
-    this.orderFields.push(\`\${field} \${direction}\`);
+  orderBy(field, dir = 'ASC') {
+    this.orderFields.push(\`\${field} \${dir}\`);
     return this;
   }
 
@@ -316,83 +322,59 @@ initDatabase(new PostgreSQLFactory());`,
   }
 
   build() {
-    let sql = \`SELECT * FROM \${this.table}\`;
-    if (this.conditions.length) {
-      sql += \` WHERE \${this.conditions.join(' AND ')}\`;
-    }
-    if (this.orderFields.length) {
-      sql += \` ORDER BY \${this.orderFields.join(', ')}\`;
-    }
-    if (this.limitCount) {
-      sql += \` LIMIT \${this.limitCount}\`;
-    }
+    let sql = \`SELECT \${this.selectedFields.join(', ')} FROM \${this.table}\`;
+    if (this.conditions.length) sql += \` WHERE \${this.conditions.join(' AND ')}\`;
+    if (this.orderFields.length) sql += \` ORDER BY \${this.orderFields.join(', ')}\`;
+    if (this.limitCount) sql += \` LIMIT \${this.limitCount}\`;
     return sql;
   }
 }
 
-const query = new QueryBuilder()
-  .from('users')
+const query = new QueryBuilder('users')
+  .select('name', 'email')
   .where('age > 18')
   .where('status = "active"')
   .orderBy('name')
   .limit(10)
   .build();
-
 console.log(query);`,
       },
       {
-        title: "HTML文档构建器",
-        code: `class HtmlBuilder {
-  constructor() {
-    this.title = '';
-    this.styles = [];
-    this.bodyElements = [];
-    this.scripts = [];
+        title: "HTTP请求构建器",
+        difficulty: 2,
+        code: `class RequestBuilder {
+  constructor(url) {
+    this.url = url;
+    this._method = 'GET';
+    this._headers = {};
+    this._body = null;
+    this._timeout = 5000;
   }
 
-  setTitle(title) {
-    this.title = title;
-    return this;
-  }
-
-  addStyle(css) {
-    this.styles.push(css);
-    return this;
-  }
-
-  addElement(tag, content, attrs = {}) {
-    const attrStr = Object.entries(attrs)
-      .map(([k, v]) => \`\${k}="\${v}"\`)
-      .join(' ');
-    this.bodyElements.push(\`<\${tag} \${attrStr}>\${content}</\${tag}>\`);
-    return this;
-  }
-
-  addScript(src) {
-    this.scripts.push(src);
-    return this;
-  }
+  method(m) { this._method = m; return this; }
+  header(key, value) { this._headers[key] = value; return this; }
+  body(data) { this._body = JSON.stringify(data); return this; }
+  timeout(ms) { this._timeout = ms; return this; }
 
   build() {
-    return \`<!DOCTYPE html>
-<html>
-<head><title>\${this.title}</title>
-<style>\${this.styles.join('\\n')}</style></head>
-<body>\${this.bodyElements.join('\\n')}
-\${this.scripts.map(s => \`<script src="\${s}"></script>\`).join('\\n')}
-</body></html>\`;
+    return {
+      url: this.url,
+      method: this._method,
+      headers: this._headers,
+      body: this._body,
+      timeout: this._timeout
+    };
   }
 }
 
-const page = new HtmlBuilder()
-  .setTitle('我的页面')
-  .addStyle('body { margin: 0; }')
-  .addElement('h1', '欢迎', { class: 'title' })
-  .addElement('p', '这是一个示例页面')
-  .addScript('app.js')
+const request = new RequestBuilder('/api/users')
+  .method('POST')
+  .header('Content-Type', 'application/json')
+  .header('Authorization', 'Bearer token123')
+  .body({ name: '张三', email: 'zhang@example.com' })
+  .timeout(3000)
   .build();
-
-console.log(page);`,
+console.log(request);`,
       },
     ],
   },
@@ -401,81 +383,88 @@ console.log(page);`,
     name: "原型模式",
     nameEn: "Prototype",
     category: "创建型",
+    difficulty: 2,
     description:
-      "原型模式通过复制一个已有对象来创建新对象，而不是通过类来实例化。它利用已有实例作为原型，通过克隆来创建新对象，避免了重复的初始化操作。JavaScript天然支持原型模式，因为所有对象都有原型链，Object.create() 是其核心实现。",
+      "原型模式用原型实例指定创建对象的种类，并且通过拷贝这些原型创建新的对象。它通过克隆已有对象来创建新对象，避免了重复的初始化操作，特别适合创建成本较高的对象。",
     keyPoints: [
-      "通过克隆已有对象创建新对象",
+      "通过克隆创建新对象",
       "避免重复初始化开销",
-      "注意深拷贝与浅拷贝的区别",
+      "深拷贝与浅拷贝的选择",
     ],
     examples: [
       {
-        title: "游戏角色原型克隆",
-        code: `class Character {
-  constructor(name, hp, attack, skills) {
-    this.name = name;
-    this.hp = hp;
-    this.attack = attack;
-    this.skills = skills;
+        title: "文档模板克隆",
+        difficulty: 2,
+        code: `class Document {
+  constructor(title, content, styles) {
+    this.title = title;
+    this.content = content;
+    this.styles = { ...styles };
+    this.createdAt = new Date();
   }
 
   clone() {
-    return new Character(
-      this.name,
-      this.hp,
-      this.attack,
-      [...this.skills]
-    );
+    const cloned = new Document(this.title, this.content, { ...this.styles });
+    cloned.createdAt = new Date();
+    return cloned;
   }
 
-  toString() {
-    return \`\${this.name} [HP:\${this.hp} ATK:\${this.attack}]\`;
-  }
+  setTitle(title) { this.title = title; return this; }
+  setContent(content) { this.content = content; return this; }
 }
 
-const warrior = new Character('战士', 100, 25, ['重击', '防御']);
-const warrior2 = warrior.clone();
-warrior2.name = '精英战士';
-warrior2.hp = 150;
-warrior2.skills.push('旋风斩');
+const template = new Document('报告模板', '# 标题\\n正文内容...', {
+  fontSize: '14px',
+  fontFamily: 'SimSun',
+  margin: '2cm'
+});
 
-console.log(warrior.toString());
-console.log(warrior2.toString());
-console.log(warrior.skills);  // ['重击', '防御']
-console.log(warrior2.skills); // ['重击', '防御', '旋风斩']`,
+const report1 = template.clone().setTitle('Q1季度报告');
+const report2 = template.clone().setTitle('Q2季度报告');
+console.log(report1.title, report1.styles);
+console.log(report2.title !== template.title); // true`,
       },
       {
-        title: "配置模板原型",
-        code: `const configPrototype = {
-  server: { host: 'localhost', port: 3000 },
-  database: { host: 'localhost', port: 5432, name: 'mydb' },
-  cache: { ttl: 3600, maxSize: 100 },
+        title: "游戏角色原型",
+        difficulty: 2,
+        code: `class Character {
+  constructor(config) {
+    this.name = config.name;
+    this.hp = config.hp;
+    this.attack = config.attack;
+    this.skills = [...(config.skills || [])];
+    this.equipment = { ...(config.equipment || {}) };
+  }
 
   clone() {
-    return JSON.parse(JSON.stringify(this));
+    return new Character({
+      name: this.name,
+      hp: this.hp,
+      attack: this.attack,
+      skills: [...this.skills],
+      equipment: { ...this.equipment }
+    });
   }
-};
-
-function createEnvConfig(env) {
-  const config = configPrototype.clone();
-
-  if (env === 'production') {
-    config.server.host = '0.0.0.0';
-    config.server.port = 80;
-    config.database.host = 'db.prod.internal';
-    config.cache.ttl = 7200;
-  } else if (env === 'test') {
-    config.database.name = 'mydb_test';
-    config.cache.ttl = 0;
-  }
-
-  return config;
 }
 
-const prodConfig = createEnvConfig('production');
-const testConfig = createEnvConfig('test');
-console.log(prodConfig.server); // { host: '0.0.0.0', port: 80 }
-console.log(testConfig.database.name); // 'mydb_test'`,
+const warriorProto = new Character({
+  name: '战士',
+  hp: 100,
+  attack: 25,
+  skills: ['重击', '格挡'],
+  equipment: { weapon: '长剑', armor: '铁甲' }
+});
+
+const warrior1 = warriorProto.clone();
+warrior1.name = '战士·阿尔法';
+warrior1.skills.push('旋风斩');
+
+const warrior2 = warriorProto.clone();
+warrior2.name = '战士·贝塔';
+
+console.log(warrior1.skills); // ['重击', '格挡', '旋风斩']
+console.log(warrior2.skills); // ['重击', '格挡']
+console.log(warriorProto.skills); // ['重击', '格挡']`,
       },
     ],
   },
@@ -484,17 +473,19 @@ console.log(testConfig.database.name); // 'mydb_test'`,
     name: "观察者模式",
     nameEn: "Observer",
     category: "行为型",
+    difficulty: 1,
     description:
-      "观察者模式定义了对象之间的一对多依赖关系，当一个对象的状态发生变化时，所有依赖于它的对象都会自动收到通知并更新。它是事件驱动编程的基础，广泛应用于UI事件系统、消息队列、发布-订阅系统等场景。",
+      "观察者模式定义了对象之间的一对多依赖关系，当一个对象状态改变时，所有依赖于它的对象都会收到通知并自动更新。它实现了发布-订阅机制，使得对象之间松耦合通信。",
     keyPoints: [
       "一对多的依赖关系",
-      "主题状态变化自动通知观察者",
-      "观察者可动态添加和移除",
+      "自动通知所有观察者",
+      "发布者与订阅者松耦合",
     ],
     examples: [
       {
-        title: "事件总线（EventEmitter）",
-        code: `class EventEmitter {
+        title: "事件总线",
+        difficulty: 1,
+        code: `class EventBus {
   constructor() {
     this.listeners = {};
   }
@@ -504,79 +495,70 @@ console.log(testConfig.database.name); // 'mydb_test'`,
       this.listeners[event] = [];
     }
     this.listeners[event].push(callback);
-    return this;
+    return () => this.off(event, callback);
   }
 
   off(event, callback) {
-    if (this.listeners[event]) {
-      this.listeners[event] = this.listeners[event]
-        .filter(cb => cb !== callback);
-    }
-    return this;
+    if (!this.listeners[event]) return;
+    this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
   }
 
-  emit(event, ...args) {
-    if (this.listeners[event]) {
-      this.listeners[event].forEach(cb => cb(...args));
-    }
+  emit(event, data) {
+    if (!this.listeners[event]) return;
+    this.listeners[event].forEach(cb => cb(data));
   }
 }
 
-const bus = new EventEmitter();
-
-bus.on('userLogin', (user) => {
-  console.log(\`日志: \${user.name} 登录了\`);
-});
+const bus = new EventBus();
 
 bus.on('userLogin', (user) => {
   console.log(\`欢迎回来, \${user.name}!\`);
 });
 
+bus.on('userLogin', (user) => {
+  console.log(\`记录登录日志: \${user.name} at \${new Date().toLocaleString()}\`);
+});
+
 bus.emit('userLogin', { name: '张三', id: 1 });`,
       },
       {
-        title: "数据绑定 - 响应式状态",
-        code: `class ReactiveState {
-  constructor(initialState) {
-    this._state = initialState;
-    this._watchers = {};
+        title: "响应式数据绑定",
+        difficulty: 2,
+        code: `class Reactive {
+  constructor(initialValue) {
+    this._value = initialValue;
+    this._watchers = [];
   }
 
-  get(key) {
-    return this._state[key];
+  get value() { return this._value; }
+
+  set value(newVal) {
+    const oldVal = this._value;
+    if (oldVal === newVal) return;
+    this._value = newVal;
+    this._watchers.forEach(fn => fn(newVal, oldVal));
   }
 
-  set(key, value) {
-    const oldValue = this._state[key];
-    this._state[key] = value;
-    if (oldValue !== value && this._watchers[key]) {
-      this._watchers[key].forEach(fn => fn(value, oldValue));
-    }
-  }
-
-  watch(key, callback) {
-    if (!this._watchers[key]) {
-      this._watchers[key] = [];
-    }
-    this._watchers[key].push(callback);
+  watch(fn) {
+    this._watchers.push(fn);
     return () => {
-      this._watchers[key] = this._watchers[key].filter(fn => fn !== callback);
+      this._watchers = this._watchers.filter(w => w !== fn);
     };
   }
 }
 
-const state = new ReactiveState({ count: 0, message: 'hello' });
+const temperature = new Reactive(20);
 
-state.watch('count', (newVal, oldVal) => {
-  console.log(\`count: \${oldVal} -> \${newVal}\`);
+temperature.watch((newVal, oldVal) => {
+  console.log(\`温度变化: \${oldVal}°C -> \${newVal}°C\`);
 });
 
-state.watch('count', (newVal) => {
-  document.title = \`计数: \${newVal}\`;
+temperature.watch((val) => {
+  if (val > 30) console.log('警告: 温度过高!');
 });
 
-state.set('count', 1);
-state.set('count', 2);`,
+temperature.value = 25;
+temperature.value = 35;`,
       },
     ],
   },
@@ -585,30 +567,35 @@ state.set('count', 2);`,
     name: "策略模式",
     nameEn: "Strategy",
     category: "行为型",
+    difficulty: 1,
     description:
-      "策略模式定义一系列算法，将每个算法封装起来，并使它们可以互相替换。它让算法的变化独立于使用算法的客户端。适用于有多种处理方式的场景，如表单验证、排序算法选择、支付方式切换等，避免大量的 if-else 分支。",
+      "策略模式定义了一系列算法，把它们一个个封装起来，并且使它们可以互相替换。策略模式让算法独立于使用它的客户端而变化，适用于需要在运行时选择不同算法的场景。",
     keyPoints: [
-      "将算法封装为独立的策略对象",
-      "策略之间可互相替换",
-      "消除条件分支语句",
+      "封装可互换的算法",
+      "消除大量条件分支",
+      "运行时动态切换策略",
     ],
     examples: [
       {
         title: "表单验证策略",
+        difficulty: 1,
         code: `const validators = {
-  required(value) {
-    return value.trim() !== '' ? '' : '此字段为必填项';
-  },
-  email(value) {
-    const reg = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-    return reg.test(value) ? '' : '请输入有效的邮箱地址';
-  },
-  minLength(value, len) {
-    return value.length >= len ? '' : \`至少需要\${len}个字符\`;
-  },
-  phone(value) {
-    return /^1[3-9]\\d{9}$/.test(value) ? '' : '请输入有效的手机号';
-  }
+  required: (value) => ({
+    valid: value.trim().length > 0,
+    message: '此字段为必填项'
+  }),
+  email: (value) => ({
+    valid: /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value),
+    message: '请输入有效的邮箱地址'
+  }),
+  minLength: (min) => (value) => ({
+    valid: value.length >= min,
+    message: \`最少需要 \${min} 个字符\`
+  }),
+  phone: (value) => ({
+    valid: /^1[3-9]\\d{9}$/.test(value),
+    message: '请输入有效的手机号码'
+  })
 };
 
 class FormValidator {
@@ -616,59 +603,35 @@ class FormValidator {
     this.rules = {};
   }
 
-  addRule(field, strategyName, ...params) {
-    if (!this.rules[field]) this.rules[field] = [];
-    this.rules[field].push({ strategyName, params });
-    return this;
+  addRule(field, ...strategies) {
+    this.rules[field] = strategies;
   }
 
-  validate(formData) {
+  validate(data) {
     const errors = {};
-    for (const [field, rules] of Object.entries(this.rules)) {
-      for (const { strategyName, params } of rules) {
-        const error = validators[strategyName](formData[field], ...params);
-        if (error) {
-          errors[field] = error;
+    for (const [field, strategies] of Object.entries(this.rules)) {
+      for (const strategy of strategies) {
+        const result = strategy(data[field] || '');
+        if (!result.valid) {
+          errors[field] = result.message;
           break;
         }
       }
     }
-    return errors;
+    return { valid: Object.keys(errors).length === 0, errors };
   }
 }
 
-const validator = new FormValidator();
-validator
-  .addRule('username', 'required')
-  .addRule('username', 'minLength', 3)
-  .addRule('email', 'required')
-  .addRule('email', 'email');
-
-const errors = validator.validate({ username: 'ab', email: 'bad' });
-console.log(errors);`,
+const form = new FormValidator();
+form.addRule('email', validators.required, validators.email);
+form.addRule('password', validators.required, validators.minLength(8));
+console.log(form.validate({ email: 'test@x.com', password: '123' }));`,
       },
       {
-        title: "价格计算策略",
-        code: `const pricingStrategies = {
-  normal(price) {
-    return price;
-  },
-  vip(price) {
-    return price * 0.8;
-  },
-  superVip(price) {
-    return price * 0.7;
-  },
-  sale(price, discount) {
-    return price * discount;
-  },
-  coupon(price, amount) {
-    return Math.max(0, price - amount);
-  }
-};
-
-class PriceCalculator {
-  constructor(strategy = 'normal') {
+        title: "排序策略",
+        difficulty: 1,
+        code: `class Sorter {
+  constructor(strategy) {
     this.strategy = strategy;
   }
 
@@ -676,24 +639,34 @@ class PriceCalculator {
     this.strategy = strategy;
   }
 
-  calculate(price, ...params) {
-    return pricingStrategies[this.strategy](price, ...params);
+  sort(data) {
+    return this.strategy.sort([...data]);
   }
 }
 
-const calc = new PriceCalculator();
+const byPrice = {
+  sort: (items) => items.sort((a, b) => a.price - b.price)
+};
 
-calc.setStrategy('normal');
-console.log(calc.calculate(100)); // 100
+const byName = {
+  sort: (items) => items.sort((a, b) => a.name.localeCompare(b.name))
+};
 
-calc.setStrategy('vip');
-console.log(calc.calculate(100)); // 80
+const byRating = {
+  sort: (items) => items.sort((a, b) => b.rating - a.rating)
+};
 
-calc.setStrategy('sale');
-console.log(calc.calculate(100, 0.6)); // 60
+const products = [
+  { name: '键盘', price: 299, rating: 4.5 },
+  { name: '鼠标', price: 99, rating: 4.8 },
+  { name: '显示器', price: 1999, rating: 4.2 }
+];
 
-calc.setStrategy('coupon');
-console.log(calc.calculate(100, 30)); // 70`,
+const sorter = new Sorter(byPrice);
+console.log(sorter.sort(products).map(p => p.name));
+
+sorter.setStrategy(byRating);
+console.log(sorter.sort(products).map(p => p.name));`,
       },
     ],
   },
@@ -702,40 +675,35 @@ console.log(calc.calculate(100, 30)); // 70`,
     name: "装饰器模式",
     nameEn: "Decorator",
     category: "结构型",
+    difficulty: 2,
     description:
-      "装饰器模式允许向一个对象动态添加新的功能，而不改变其结构。它是继承的替代方案，通过组合而非继承来扩展对象功能。装饰器可以层层嵌套，每一层添加一种新能力，灵活地组合出不同的功能组合。",
+      "装饰器模式动态地给一个对象添加一些额外的职责。就增加功能而言，装饰器模式比生成子类更为灵活。它通过将对象包装在装饰器对象中，以透明的方式扩展对象的功能。",
     keyPoints: [
-      "动态添加功能而不修改原对象",
-      "装饰器可层层叠加",
-      "比继承更灵活",
+      "动态添加功能",
+      "不修改原有对象",
+      "可以叠加多个装饰器",
     ],
     examples: [
       {
-        title: "函数装饰器 - 日志/性能/缓存",
-        code: `function withLogging(fn) {
-  return function (...args) {
-    console.log(\`调用 \${fn.name}，参数:\`, args);
-    const result = fn.apply(this, args);
-    console.log(\`\${fn.name} 返回:\`, result);
-    return result;
-  };
-}
-
-function withTiming(fn) {
-  return function (...args) {
+        title: "日志装饰器",
+        difficulty: 2,
+        code: `function withLogging(fn, label) {
+  return function(...args) {
+    console.log(\`[\${label}] 调用参数:\`, args);
     const start = Date.now();
     const result = fn.apply(this, args);
-    console.log(\`\${fn.name} 耗时: \${Date.now() - start}ms\`);
+    const duration = Date.now() - start;
+    console.log(\`[\${label}] 返回值:\`, result, \`耗时: \${duration}ms\`);
     return result;
   };
 }
 
 function withCache(fn) {
   const cache = new Map();
-  return function (...args) {
+  return function(...args) {
     const key = JSON.stringify(args);
     if (cache.has(key)) {
-      console.log('命中缓存');
+      console.log('[Cache] 命中缓存');
       return cache.get(key);
     }
     const result = fn.apply(this, args);
@@ -749,48 +717,52 @@ function fibonacci(n) {
   return fibonacci(n - 1) + fibonacci(n - 2);
 }
 
-const enhanced = withLogging(withTiming(withCache(fibonacci)));
-enhanced(10);
-enhanced(10); // 命中缓存`,
+const enhancedFib = withLogging(withCache(fibonacci), 'Fibonacci');
+enhancedFib(10);
+enhancedFib(10); // 命中缓存`,
       },
       {
-        title: "类装饰器 - 咖啡订单",
-        code: `class Coffee {
-  cost() { return 10; }
-  description() { return '基础咖啡'; }
-}
-
-class MilkDecorator {
-  constructor(coffee) {
-    this.coffee = coffee;
+        title: "HTTP客户端装饰",
+        difficulty: 2,
+        code: `class BasicHTTPClient {
+  async request(url, options = {}) {
+    return { url, ...options, timestamp: Date.now() };
   }
-  cost() { return this.coffee.cost() + 3; }
-  description() { return this.coffee.description() + ' + 牛奶'; }
 }
 
-class SugarDecorator {
-  constructor(coffee) {
-    this.coffee = coffee;
+class AuthDecorator {
+  constructor(client, token) {
+    this.client = client;
+    this.token = token;
   }
-  cost() { return this.coffee.cost() + 1; }
-  description() { return this.coffee.description() + ' + 糖'; }
-}
-
-class WhipDecorator {
-  constructor(coffee) {
-    this.coffee = coffee;
+  async request(url, options = {}) {
+    options.headers = { ...options.headers, Authorization: \`Bearer \${this.token}\` };
+    return this.client.request(url, options);
   }
-  cost() { return this.coffee.cost() + 5; }
-  description() { return this.coffee.description() + ' + 奶油'; }
 }
 
-let order = new Coffee();
-order = new MilkDecorator(order);
-order = new SugarDecorator(order);
-order = new WhipDecorator(order);
+class RetryDecorator {
+  constructor(client, maxRetries = 3) {
+    this.client = client;
+    this.maxRetries = maxRetries;
+  }
+  async request(url, options = {}) {
+    for (let i = 0; i <= this.maxRetries; i++) {
+      try {
+        return await this.client.request(url, options);
+      } catch (e) {
+        if (i === this.maxRetries) throw e;
+        console.log(\`重试第 \${i + 1} 次...\`);
+      }
+    }
+  }
+}
 
-console.log(order.description()); // 基础咖啡 + 牛奶 + 糖 + 奶油
-console.log(\`总价: ¥\${order.cost()}\`); // 总价: ¥19`,
+let client = new BasicHTTPClient();
+client = new AuthDecorator(client, 'my-token');
+client = new RetryDecorator(client, 2);
+
+client.request('/api/data').then(console.log);`,
       },
     ],
   },
@@ -799,85 +771,83 @@ console.log(\`总价: ¥\${order.cost()}\`); // 总价: ¥19`,
     name: "适配器模式",
     nameEn: "Adapter",
     category: "结构型",
+    difficulty: 2,
     description:
-      "适配器模式将一个类的接口转换成客户端期望的另一个接口，使原本接口不兼容的类可以一起工作。它就像现实中的电源适配器，在不修改现有代码的情况下，让新旧系统协同工作。常用于整合第三方库或遗留系统。",
+      "适配器模式将一个类的接口转换成客户希望的另外一个接口。它使得原本由于接口不兼容而不能一起工作的那些类可以一起工作，就像现实中的电源适配器一样。",
     keyPoints: [
       "转换不兼容的接口",
-      "不修改原有代码即可复用",
-      "连接新旧系统的桥梁",
+      "不修改现有代码",
+      "新旧系统无缝对接",
     ],
     examples: [
       {
-        title: "第三方日志库适配",
-        code: `class OldLogger {
-  logMessage(msg, level) {
-    console.log(\`[\${level.toUpperCase()}] \${msg}\`);
-  }
-}
-
-class NewLoggerAdapter {
-  constructor() {
-    this.oldLogger = new OldLogger();
-  }
-
-  info(msg) {
-    this.oldLogger.logMessage(msg, 'info');
-  }
-
-  warn(msg) {
-    this.oldLogger.logMessage(msg, 'warn');
-  }
-
-  error(msg) {
-    this.oldLogger.logMessage(msg, 'error');
-  }
-
-  debug(msg) {
-    this.oldLogger.logMessage(msg, 'debug');
-  }
-}
-
-const logger = new NewLoggerAdapter();
-logger.info('系统启动');
-logger.error('连接失败');
-logger.debug('变量值: x=42');`,
-      },
-      {
-        title: "API响应适配器",
-        code: `class LegacyUserAPI {
+        title: "旧API适配新接口",
+        difficulty: 2,
+        code: `class OldUserService {
   getUser(id) {
     return {
       user_id: id,
       first_name: '张',
       last_name: '三',
-      email_address: 'zhangsan@example.com',
+      email_address: 'zhang@example.com',
       phone_number: '13800138000',
-      create_date: '2024-01-01'
+      created_time: '2024-01-01'
     };
   }
 }
 
-class UserAPIAdapter {
-  constructor() {
-    this.legacyAPI = new LegacyUserAPI();
+class UserAdapter {
+  constructor(oldService) {
+    this.oldService = oldService;
   }
 
-  getUser(id) {
-    const legacy = this.legacyAPI.getUser(id);
+  getUserById(id) {
+    const legacy = this.oldService.getUser(id);
     return {
       id: legacy.user_id,
       name: \`\${legacy.first_name}\${legacy.last_name}\`,
       email: legacy.email_address,
       phone: legacy.phone_number,
-      createdAt: new Date(legacy.create_date).toISOString()
+      createdAt: legacy.created_time
     };
   }
 }
 
-const api = new UserAPIAdapter();
-const user = api.getUser(1);
+const adapter = new UserAdapter(new OldUserService());
+const user = adapter.getUserById(1);
 console.log(user);
 // { id: 1, name: '张三', email: '...', phone: '...', createdAt: '...' }`,
+      },
+      {
+        title: "第三方库适配",
+        difficulty: 2,
+        code: `class ThirdPartyLogger {
+  writeLog(level, timestamp, msg) {
+    return \`[\${level}] \${timestamp}: \${msg}\`;
+  }
+}
+
+class LoggerAdapter {
+  constructor() {
+    this.logger = new ThirdPartyLogger();
+  }
+
+  info(message) {
+    return this.logger.writeLog('INFO', new Date().toISOString(), message);
+  }
+
+  warn(message) {
+    return this.logger.writeLog('WARN', new Date().toISOString(), message);
+  }
+
+  error(message) {
+    return this.logger.writeLog('ERROR', new Date().toISOString(), message);
+  }
+}
+
+const logger = new LoggerAdapter();
+console.log(logger.info('用户登录成功'));
+console.log(logger.error('数据库连接失败'));`,
       },
     ],
   },
@@ -886,8 +856,9 @@ console.log(user);
     name: "外观模式",
     nameEn: "Facade",
     category: "结构型",
+    difficulty: 2,
     description:
-      "外观模式为子系统中的一组接口提供一个统一的高层接口，使子系统更容易使用。它隐藏了系统的复杂性，对外提供简单的调用方式。就像电脑的开机按钮，背后执行了内存检测、系统加载等复杂操作，但用户只需按一个按钮。",
+      "外观模式为子系统中的一组接口提供一个统一的高层接口。它定义了一个更高层次的接口，使得子系统更加容易使用，隐藏了系统的复杂性。",
     keyPoints: [
       "简化复杂子系统的使用",
       "提供统一的高层接口",
@@ -896,6 +867,7 @@ console.log(user);
     examples: [
       {
         title: "多媒体播放器外观",
+        difficulty: 2,
         code: `class AudioDecoder {
   decode(file) { return \`解码音频: \${file}\`; }
 }
@@ -908,70 +880,55 @@ class SubtitleParser {
   parse(file) { return \`加载字幕: \${file}\`; }
 }
 
-class AudioOutput {
-  play(data) { return \`播放音频...\`; }
+class Display {
+  render(data) { return \`渲染画面: \${data}\`; }
 }
 
-class VideoRenderer {
-  render(data) { return \`渲染视频画面...\`; }
+class Speaker {
+  play(data) { return \`播放音频: \${data}\`; }
 }
 
 class MediaPlayerFacade {
   constructor() {
-    this.audioDecoder = new AudioDecoder();
-    this.videoDecoder = new VideoDecoder();
-    this.subtitleParser = new SubtitleParser();
-    this.audioOutput = new AudioOutput();
-    this.videoRenderer = new VideoRenderer();
+    this.audio = new AudioDecoder();
+    this.video = new VideoDecoder();
+    this.subtitle = new SubtitleParser();
+    this.display = new Display();
+    this.speaker = new Speaker();
   }
 
   playMovie(movieFile, subtitleFile) {
     const results = [];
-    results.push(this.videoDecoder.decode(movieFile));
-    results.push(this.audioDecoder.decode(movieFile));
-    if (subtitleFile) {
-      results.push(this.subtitleParser.parse(subtitleFile));
-    }
-    results.push(this.videoRenderer.render());
-    results.push(this.audioOutput.play());
+    results.push(this.video.decode(movieFile));
+    results.push(this.audio.decode(movieFile));
+    results.push(this.subtitle.parse(subtitleFile));
+    results.push(this.display.render('视频帧'));
+    results.push(this.speaker.play('音频流'));
     return results;
   }
 }
 
 const player = new MediaPlayerFacade();
-const steps = player.playMovie('movie.mp4', 'movie.srt');
-steps.forEach(s => console.log(s));`,
+const output = player.playMovie('movie.mp4', 'movie.srt');
+output.forEach(line => console.log(line));`,
       },
       {
         title: "电商下单外观",
+        difficulty: 2,
         code: `class Inventory {
-  check(itemId) {
-    console.log(\`检查库存: \${itemId}\`);
-    return true;
-  }
-  reserve(itemId) {
-    console.log(\`锁定库存: \${itemId}\`);
-  }
+  check(productId) { return { available: true, stock: 50 }; }
 }
 
 class Payment {
-  process(amount, method) {
-    console.log(\`处理支付: ¥\${amount}, 方式: \${method}\`);
-    return { txId: 'TX' + Date.now() };
-  }
+  charge(userId, amount) { return { success: true, transactionId: 'TXN001' }; }
 }
 
 class Shipping {
-  schedule(address) {
-    console.log(\`安排配送至: \${address}\`);
-    return { trackingId: 'SH' + Date.now() };
-  }
+  createOrder(address, items) { return { trackingNo: 'SF001', eta: '3天' }; }
 }
 
 class Notification {
-  send(userId, message) {
-    console.log(\`通知用户\${userId}: \${message}\`);
-  }
+  sendEmail(userId, message) { return \`邮件已发送: \${message}\`; }
 }
 
 class OrderFacade {
@@ -982,20 +939,22 @@ class OrderFacade {
     this.notification = new Notification();
   }
 
-  placeOrder(userId, itemId, amount, payMethod, address) {
-    if (!this.inventory.check(itemId)) {
-      throw new Error('库存不足');
-    }
-    this.inventory.reserve(itemId);
-    const pay = this.payment.process(amount, payMethod);
-    const ship = this.shipping.schedule(address);
-    this.notification.send(userId, '下单成功!');
-    return { txId: pay.txId, trackingId: ship.trackingId };
+  placeOrder(userId, productId, address, amount) {
+    const stock = this.inventory.check(productId);
+    if (!stock.available) return { success: false, reason: '库存不足' };
+
+    const payment = this.payment.charge(userId, amount);
+    if (!payment.success) return { success: false, reason: '支付失败' };
+
+    const shipping = this.shipping.createOrder(address, [productId]);
+    this.notification.sendEmail(userId, \`订单已发货，运单号: \${shipping.trackingNo}\`);
+
+    return { success: true, trackingNo: shipping.trackingNo, eta: shipping.eta };
   }
 }
 
 const order = new OrderFacade();
-order.placeOrder('U1', 'ITEM-001', 99, '微信支付', '北京市朝阳区');`,
+console.log(order.placeOrder('U001', 'P100', '北京市...', 299));`,
       },
     ],
   },
@@ -1004,99 +963,97 @@ order.placeOrder('U1', 'ITEM-001', 99, '微信支付', '北京市朝阳区');`,
     name: "代理模式",
     nameEn: "Proxy",
     category: "结构型",
+    difficulty: 2,
     description:
-      "代理模式为其他对象提供一种代理以控制对这个对象的访问。代理对象在客户端和目标对象之间起到中介作用，可以在不改变目标对象的情况下添加额外的功能，如访问控制、缓存、延迟加载、日志记录等。",
+      "代理模式为其他对象提供一种代理以控制对这个对象的访问。它在不改变目标对象的前提下，通过代理对象来增加额外的控制逻辑，如访问控制、缓存、延迟加载等。",
     keyPoints: [
-      "控制对目标对象的访问",
-      "在访问前后添加额外逻辑",
-      "对客户端透明",
+      "控制对原对象的访问",
+      "透明代理，接口一致",
+      "可用于缓存、权限、懒加载",
     ],
     examples: [
       {
-        title: "Proxy实现数据验证",
-        code: `const userValidator = {
-  set(target, property, value) {
-    if (property === 'age') {
-      if (typeof value !== 'number') {
-        throw new TypeError('年龄必须是数字');
-      }
-      if (value < 0 || value > 150) {
-        throw new RangeError('年龄必须在0-150之间');
-      }
+        title: "缓存代理",
+        difficulty: 2,
+        code: `class HeavyComputation {
+  calculate(n) {
+    let result = 0;
+    for (let i = 0; i < n * 1000000; i++) {
+      result += Math.random();
     }
-    if (property === 'email') {
-      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value)) {
-        throw new Error('邮箱格式不正确');
-      }
-    }
-    target[property] = value;
-    return true;
-  },
-
-  get(target, property) {
-    if (property === 'fullInfo') {
-      return \`\${target.name} (\${target.age}) - \${target.email}\`;
-    }
-    return target[property];
+    return Math.round(result);
   }
-};
+}
 
-const user = new Proxy({}, userValidator);
-user.name = '李四';
-user.age = 25;
-user.email = 'lisi@example.com';
-console.log(user.fullInfo);
+class CacheProxy {
+  constructor(target) {
+    this.target = target;
+    this.cache = new Map();
+  }
 
-try {
-  user.age = 200; // 抛出 RangeError
-} catch (e) {
-  console.log(e.message);
-}`,
+  calculate(n) {
+    if (this.cache.has(n)) {
+      console.log(\`[缓存命中] n=\${n}\`);
+      return this.cache.get(n);
+    }
+    console.log(\`[计算中] n=\${n}\`);
+    const result = this.target.calculate(n);
+    this.cache.set(n, result);
+    return result;
+  }
+}
+
+const computation = new CacheProxy(new HeavyComputation());
+console.log(computation.calculate(5)); // 计算
+console.log(computation.calculate(5)); // 缓存命中
+console.log(computation.calculate(3)); // 计算`,
       },
       {
-        title: "虚拟代理 - 图片懒加载",
-        code: `class RealImage {
-  constructor(url) {
-    this.url = url;
-    this.loadImage();
-  }
-
-  loadImage() {
-    console.log(\`从服务器加载图片: \${this.url}\`);
-    this.data = \`[图片数据: \${this.url}]\`;
-  }
-
-  display() {
-    console.log(\`显示图片: \${this.data}\`);
-  }
+        title: "访问控制代理",
+        difficulty: 3,
+        code: `class DataService {
+  getData(key) { return \`数据[\${key}]的内容\`; }
+  setData(key, value) { return \`已保存: \${key}=\${value}\`; }
+  deleteData(key) { return \`已删除: \${key}\`; }
 }
 
-class ImageProxy {
-  constructor(url) {
-    this.url = url;
-    this.realImage = null;
+class AccessProxy {
+  constructor(service, userRole) {
+    this.service = service;
+    this.userRole = userRole;
+    this.permissions = {
+      guest: ['getData'],
+      user: ['getData', 'setData'],
+      admin: ['getData', 'setData', 'deleteData']
+    };
   }
 
-  display() {
-    if (!this.realImage) {
-      console.log(\`显示占位符...\`);
-      this.realImage = new RealImage(this.url);
+  _checkPermission(method) {
+    const allowed = this.permissions[this.userRole] || [];
+    if (!allowed.includes(method)) {
+      throw new Error(\`权限不足: \${this.userRole} 无法执行 \${method}\`);
     }
-    this.realImage.display();
+  }
+
+  getData(key) {
+    this._checkPermission('getData');
+    return this.service.getData(key);
+  }
+
+  setData(key, value) {
+    this._checkPermission('setData');
+    return this.service.setData(key, value);
+  }
+
+  deleteData(key) {
+    this._checkPermission('deleteData');
+    return this.service.deleteData(key);
   }
 }
 
-const gallery = [
-  new ImageProxy('photo1.jpg'),
-  new ImageProxy('photo2.jpg'),
-  new ImageProxy('photo3.jpg')
-];
-
-// 只有被显示的图片才会真正加载
-console.log('--- 显示第一张 ---');
-gallery[0].display();
-console.log('--- 再次显示第一张(已缓存) ---');
-gallery[0].display();`,
+const guestProxy = new AccessProxy(new DataService(), 'guest');
+console.log(guestProxy.getData('config'));
+try { guestProxy.setData('x', '1'); } catch(e) { console.log(e.message); }`,
       },
     ],
   },
@@ -1105,27 +1062,29 @@ gallery[0].display();`,
     name: "命令模式",
     nameEn: "Command",
     category: "行为型",
+    difficulty: 3,
     description:
-      "命令模式将请求封装成对象，从而可以用不同的请求来参数化客户端，支持请求的排队、记录日志、撤销操作等功能。它将'发出请求的对象'与'执行请求的对象'解耦。常用于实现撤销/重做、宏命令、事务操作等。",
+      "命令模式将一个请求封装为一个对象，从而使你可以用不同的请求对客户进行参数化、对请求排队或记录请求日志，以及支持可撤销的操作。",
     keyPoints: [
-      "将操作封装为命令对象",
+      "将操作封装为对象",
       "支持撤销/重做",
-      "命令可排队和延迟执行",
+      "解耦调用者与执行者",
     ],
     examples: [
       {
-        title: "文本编辑器 - 撤销/重做",
+        title: "文本编辑器撤销/重做",
+        difficulty: 3,
         code: `class TextEditor {
-  constructor() {
-    this.content = '';
-  }
+  constructor() { this.content = ''; }
   insert(text, position) {
     this.content = this.content.slice(0, position) + text + this.content.slice(position);
   }
   delete(position, length) {
+    const deleted = this.content.slice(position, position + length);
     this.content = this.content.slice(0, position) + this.content.slice(position + length);
+    return deleted;
   }
-  toString() { return this.content; }
+  getContent() { return this.content; }
 }
 
 class InsertCommand {
@@ -1139,86 +1098,91 @@ class InsertCommand {
 }
 
 class CommandHistory {
-  constructor() {
-    this.history = [];
-    this.pointer = -1;
-  }
+  constructor() { this.history = []; this.pointer = -1; }
   execute(command) {
-    command.execute();
     this.history = this.history.slice(0, this.pointer + 1);
+    command.execute();
     this.history.push(command);
     this.pointer++;
   }
   undo() {
-    if (this.pointer >= 0) {
-      this.history[this.pointer].undo();
-      this.pointer--;
-    }
+    if (this.pointer < 0) return;
+    this.history[this.pointer].undo();
+    this.pointer--;
   }
   redo() {
-    if (this.pointer < this.history.length - 1) {
-      this.pointer++;
-      this.history[this.pointer].execute();
-    }
+    if (this.pointer >= this.history.length - 1) return;
+    this.pointer++;
+    this.history[this.pointer].execute();
   }
 }
 
 const editor = new TextEditor();
 const history = new CommandHistory();
-
 history.execute(new InsertCommand(editor, 'Hello', 0));
 history.execute(new InsertCommand(editor, ' World', 5));
-console.log(editor.toString()); // 'Hello World'
-
+console.log(editor.getContent()); // 'Hello World'
 history.undo();
-console.log(editor.toString()); // 'Hello'
-
+console.log(editor.getContent()); // 'Hello'
 history.redo();
-console.log(editor.toString()); // 'Hello World'`,
+console.log(editor.getContent()); // 'Hello World'`,
       },
       {
-        title: "智能家居遥控器",
-        code: `class Light {
-  on() { return '灯已打开'; }
-  off() { return '灯已关闭'; }
-}
+        title: "任务队列",
+        difficulty: 3,
+        code: `class TaskQueue {
+  constructor() { this.queue = []; this.isRunning = false; }
 
-class AirConditioner {
-  on() { return '空调已打开'; }
-  off() { return '空调已关闭'; }
-  setTemp(t) { return \`温度设为\${t}°C\`; }
-}
-
-class LightOnCommand {
-  constructor(light) { this.light = light; }
-  execute() { return this.light.on(); }
-  undo() { return this.light.off(); }
-}
-
-class ACAutoCommand {
-  constructor(ac, temp) { this.ac = ac; this.temp = temp; }
-  execute() {
-    return [this.ac.on(), this.ac.setTemp(this.temp)].join(', ');
+  addTask(command) {
+    this.queue.push(command);
+    if (!this.isRunning) this.run();
   }
-  undo() { return this.ac.off(); }
+
+  async run() {
+    this.isRunning = true;
+    while (this.queue.length > 0) {
+      const command = this.queue.shift();
+      console.log(\`执行任务: \${command.name}\`);
+      await command.execute();
+    }
+    this.isRunning = false;
+  }
 }
 
-class MacroCommand {
-  constructor(commands) { this.commands = commands; }
-  execute() { return this.commands.map(c => c.execute()); }
-  undo() { return this.commands.reverse().map(c => c.undo()); }
+class DownloadCommand {
+  constructor(url) {
+    this.name = \`下载 \${url}\`;
+    this.url = url;
+  }
+  execute() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        console.log(\`  完成下载: \${this.url}\`);
+        resolve();
+      }, 100);
+    });
+  }
 }
 
-const light = new Light();
-const ac = new AirConditioner();
+class ProcessCommand {
+  constructor(filename) {
+    this.name = \`处理 \${filename}\`;
+    this.filename = filename;
+  }
+  execute() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        console.log(\`  处理完成: \${this.filename}\`);
+        resolve();
+      }, 50);
+    });
+  }
+}
 
-const homeMode = new MacroCommand([
-  new LightOnCommand(light),
-  new ACAutoCommand(ac, 24)
-]);
-
-console.log('回家模式:', homeMode.execute());
-console.log('离家模式:', homeMode.undo());`,
+const queue = new TaskQueue();
+queue.addTask(new DownloadCommand('file1.zip'));
+queue.addTask(new ProcessCommand('file1.zip'));
+queue.addTask(new DownloadCommand('file2.zip'));`,
       },
     ],
   },
@@ -1227,16 +1191,18 @@ console.log('离家模式:', homeMode.undo());`,
     name: "迭代器模式",
     nameEn: "Iterator",
     category: "行为型",
+    difficulty: 2,
     description:
-      "迭代器模式提供一种方法顺序访问一个聚合对象中的各个元素，而又不需暴露该对象的内部表示。JavaScript中的 for...of 循环和 Symbol.iterator 就是迭代器模式的原生实现。它让不同数据结构能以统一的方式被遍历。",
+      "迭代器模式提供一种方法顺序访问一个聚合对象中的各个元素，而又不暴露该对象的内部表示。它使得遍历集合的方式统一化，支持不同的遍历策略。",
     keyPoints: [
-      "统一不同数据结构的遍历方式",
-      "不暴露集合的内部结构",
-      "支持多种遍历策略",
+      "统一遍历接口",
+      "不暴露集合内部结构",
+      "支持多种遍历方式",
     ],
     examples: [
       {
-        title: "自定义范围迭代器",
+        title: "范围迭代器",
+        difficulty: 2,
         code: `class Range {
   constructor(start, end, step = 1) {
     this.start = start;
@@ -1246,7 +1212,8 @@ console.log('离家模式:', homeMode.undo());`,
 
   [Symbol.iterator]() {
     let current = this.start;
-    const { end, step } = this;
+    const end = this.end;
+    const step = this.step;
 
     return {
       next() {
@@ -1266,18 +1233,17 @@ for (const num of range) {
   console.log(num); // 1, 3, 5, 7, 9
 }
 
-console.log([...new Range(0, 5)]); // [0, 1, 2, 3, 4, 5]
-
-const [a, b, c] = new Range(10, 30, 10);
-console.log(a, b, c); // 10, 20, 30`,
+console.log([...new Range(0, 5)]); // [0, 1, 2, 3, 4, 5]`,
       },
       {
-        title: "树结构深度优先迭代器",
+        title: "树结构深度优先迭代",
+        difficulty: 3,
         code: `class TreeNode {
-  constructor(value, children = []) {
+  constructor(value) {
     this.value = value;
-    this.children = children;
+    this.children = [];
   }
+  addChild(node) { this.children.push(node); return this; }
 }
 
 class DepthFirstIterator {
@@ -1288,9 +1254,7 @@ class DepthFirstIterator {
   [Symbol.iterator]() { return this; }
 
   next() {
-    if (this.stack.length === 0) {
-      return { done: true };
-    }
+    if (this.stack.length === 0) return { done: true };
     const node = this.stack.pop();
     for (let i = node.children.length - 1; i >= 0; i--) {
       this.stack.push(node.children[i]);
@@ -1299,20 +1263,16 @@ class DepthFirstIterator {
   }
 }
 
-const tree = new TreeNode('根', [
-  new TreeNode('A', [
-    new TreeNode('A1'),
-    new TreeNode('A2')
-  ]),
-  new TreeNode('B', [
-    new TreeNode('B1')
-  ]),
-  new TreeNode('C')
-]);
+const root = new TreeNode('CEO');
+const cto = new TreeNode('CTO').addChild(new TreeNode('前端')).addChild(new TreeNode('后端'));
+const cfo = new TreeNode('CFO').addChild(new TreeNode('财务'));
+root.addChild(cto).addChild(cfo);
 
-for (const value of new DepthFirstIterator(tree)) {
-  console.log(value); // 根, A, A1, A2, B, B1, C
-}`,
+const iterator = new DepthFirstIterator(root);
+for (const value of iterator) {
+  console.log(value);
+}
+// CEO, CTO, 前端, 后端, CFO, 财务`,
       },
     ],
   },
@@ -1321,119 +1281,106 @@ for (const value of new DepthFirstIterator(tree)) {
     name: "状态模式",
     nameEn: "State",
     category: "行为型",
+    difficulty: 3,
     description:
-      "状态模式允许一个对象在其内部状态改变时改变它的行为，对象看起来似乎修改了它的类。它将与特定状态相关的行为封装在独立的状态类中，使状态转换逻辑更清晰。适用于对象行为取决于其状态，且状态数较多的场景。",
+      "状态模式允许一个对象在其内部状态改变时改变它的行为。对象看起来似乎修改了它的类。它将状态相关的行为封装在独立的状态类中，使状态转换逻辑更清晰。",
     keyPoints: [
-      "对象行为随状态改变而改变",
-      "将状态逻辑封装在独立类中",
-      "状态转换规则清晰明确",
+      "将状态行为封装在独立类中",
+      "状态转换逻辑清晰",
+      "消除大量条件判断",
     ],
     examples: [
       {
-        title: "交通信号灯状态机",
-        code: `class RedLight {
-  constructor(context) { this.context = context; }
-  display() { return '🔴 红灯 - 禁止通行'; }
-  next() { this.context.setState(new GreenLight(this.context)); }
-  duration() { return 30; }
+        title: "订单状态机",
+        difficulty: 3,
+        code: `class OrderState {
+  constructor(order) { this.order = order; }
+  pay() { throw new Error('当前状态不支持此操作'); }
+  ship() { throw new Error('当前状态不支持此操作'); }
+  deliver() { throw new Error('当前状态不支持此操作'); }
+  cancel() { throw new Error('当前状态不支持此操作'); }
 }
 
-class GreenLight {
-  constructor(context) { this.context = context; }
-  display() { return '🟢 绿灯 - 允许通行'; }
-  next() { this.context.setState(new YellowLight(this.context)); }
-  duration() { return 25; }
-}
-
-class YellowLight {
-  constructor(context) { this.context = context; }
-  display() { return '🟡 黄灯 - 准备停车'; }
-  next() { this.context.setState(new RedLight(this.context)); }
-  duration() { return 5; }
-}
-
-class TrafficLight {
-  constructor() {
-    this.state = new RedLight(this);
+class PendingState extends OrderState {
+  pay() {
+    console.log('支付成功');
+    this.order.setState(new PaidState(this.order));
   }
+  cancel() {
+    console.log('订单已取消');
+    this.order.setState(new CancelledState(this.order));
+  }
+}
+
+class PaidState extends OrderState {
+  ship() {
+    console.log('已发货');
+    this.order.setState(new ShippedState(this.order));
+  }
+}
+
+class ShippedState extends OrderState {
+  deliver() {
+    console.log('已签收');
+    this.order.setState(new DeliveredState(this.order));
+  }
+}
+
+class DeliveredState extends OrderState {}
+class CancelledState extends OrderState {}
+
+class Order {
+  constructor() { this.state = new PendingState(this); }
   setState(state) { this.state = state; }
-  display() { return this.state.display(); }
-  change() { this.state.next(); }
-  getDuration() { return this.state.duration(); }
-}
-
-const light = new TrafficLight();
-console.log(light.display()); // 红灯
-light.change();
-console.log(light.display()); // 绿灯
-light.change();
-console.log(light.display()); // 黄灯
-light.change();
-console.log(light.display()); // 红灯`,
-      },
-      {
-        title: "订单状态流转",
-        code: `class Order {
-  constructor() {
-    this.state = new PendingState(this);
-    this.log = [];
-  }
-  setState(state) {
-    this.log.push(this.state.name);
-    this.state = state;
-  }
-  pay() { return this.state.pay(); }
-  ship() { return this.state.ship(); }
-  deliver() { return this.state.deliver(); }
-  cancel() { return this.state.cancel(); }
-  getStatus() { return this.state.name; }
-}
-
-class PendingState {
-  constructor(order) { this.order = order; this.name = '待付款'; }
-  pay() { this.order.setState(new PaidState(this.order)); return '支付成功'; }
-  ship() { return '错误: 请先完成支付'; }
-  deliver() { return '错误: 订单尚未发货'; }
-  cancel() { this.order.setState(new CancelledState(this.order)); return '订单已取消'; }
-}
-
-class PaidState {
-  constructor(order) { this.order = order; this.name = '已付款'; }
-  pay() { return '错误: 已经付过款了'; }
-  ship() { this.order.setState(new ShippedState(this.order)); return '已发货'; }
-  deliver() { return '错误: 尚未发货'; }
-  cancel() { this.order.setState(new CancelledState(this.order)); return '已取消并退款'; }
-}
-
-class ShippedState {
-  constructor(order) { this.order = order; this.name = '已发货'; }
-  pay() { return '错误: 已付款'; }
-  ship() { return '错误: 已发货'; }
-  deliver() { this.order.setState(new DeliveredState(this.order)); return '已签收'; }
-  cancel() { return '错误: 已发货不可取消'; }
-}
-
-class DeliveredState {
-  constructor(order) { this.order = order; this.name = '已签收'; }
-  pay() { return '订单已完成'; }
-  ship() { return '订单已完成'; }
-  deliver() { return '已签收'; }
-  cancel() { return '错误: 已签收不可取消'; }
-}
-
-class CancelledState {
-  constructor(order) { this.order = order; this.name = '已取消'; }
-  pay() { return '订单已取消'; }
-  ship() { return '订单已取消'; }
-  deliver() { return '订单已取消'; }
-  cancel() { return '已经取消了'; }
+  pay() { this.state.pay(); }
+  ship() { this.state.ship(); }
+  deliver() { this.state.deliver(); }
+  cancel() { this.state.cancel(); }
 }
 
 const order = new Order();
-console.log(order.pay());     // 支付成功
-console.log(order.ship());    // 已发货
-console.log(order.cancel());  // 错误: 已发货不可取消
-console.log(order.deliver()); // 已签收`,
+order.pay();    // 支付成功
+order.ship();   // 已发货
+order.deliver();// 已签收
+try { order.pay(); } catch(e) { console.log(e.message); }`,
+      },
+      {
+        title: "交通灯状态",
+        difficulty: 3,
+        code: `class TrafficLight {
+  constructor() {
+    this.states = {
+      red: { color: '红灯', duration: 5000, next: 'green', action: '禁止通行' },
+      green: { color: '绿灯', duration: 4000, next: 'yellow', action: '允许通行' },
+      yellow: { color: '黄灯', duration: 1500, next: 'red', action: '准备停车' }
+    };
+    this.current = 'red';
+    this.listeners = [];
+  }
+
+  onChange(fn) { this.listeners.push(fn); }
+
+  transition() {
+    const state = this.states[this.current];
+    this.current = state.next;
+    const newState = this.states[this.current];
+    this.listeners.forEach(fn => fn(newState));
+    return newState;
+  }
+
+  getStatus() {
+    return this.states[this.current];
+  }
+}
+
+const light = new TrafficLight();
+light.onChange((state) => {
+  console.log(\`切换到: \${state.color} - \${state.action}\`);
+});
+
+light.transition(); // 切换到: 绿灯 - 允许通行
+light.transition(); // 切换到: 黄灯 - 准备停车
+light.transition(); // 切换到: 红灯 - 禁止通行`,
       },
     ],
   },
@@ -1442,77 +1389,78 @@ console.log(order.deliver()); // 已签收`,
     name: "中介者模式",
     nameEn: "Mediator",
     category: "行为型",
+    difficulty: 3,
     description:
-      "中介者模式用一个中介对象来封装一系列的对象交互，使各对象不需要显式地相互引用，从而使其耦合松散。它将多对多的交互简化为一对多的交互，所有组件只与中介者通信。常见于聊天室、表单联动、飞机调度塔台等场景。",
+      "中介者模式用一个中介对象来封装一系列的对象交互。中介者使各对象不需要显式地相互引用，从而使其耦合松散，而且可以独立地改变它们之间的交互。",
     keyPoints: [
-      "将多对多交互简化为一对多",
-      "组件间不直接通信",
-      "中介者统一协调各组件",
+      "集中管理对象间通信",
+      "减少对象间直接依赖",
+      "简化多对多交互为一对多",
     ],
     examples: [
       {
         title: "聊天室中介者",
+        difficulty: 3,
         code: `class ChatRoom {
-  constructor() {
-    this.users = {};
+  constructor(name) {
+    this.name = name;
+    this.users = new Map();
+    this.messages = [];
   }
 
-  register(user) {
-    this.users[user.name] = user;
-    user.chatRoom = this;
+  join(user) {
+    this.users.set(user.name, user);
+    user.room = this;
+    this.broadcast(\`[系统] \${user.name} 加入了聊天室\`, user);
   }
 
-  send(message, from, to) {
-    if (to) {
-      if (this.users[to]) {
-        this.users[to].receive(message, from);
-      }
+  leave(user) {
+    this.users.delete(user.name);
+    this.broadcast(\`[系统] \${user.name} 离开了聊天室\`, user);
+  }
+
+  sendMessage(message, sender, receiver) {
+    const msg = { from: sender.name, text: message, time: new Date().toLocaleTimeString() };
+    this.messages.push(msg);
+    if (receiver) {
+      const target = this.users.get(receiver);
+      if (target) target.receive(msg);
     } else {
-      Object.values(this.users).forEach(user => {
-        if (user.name !== from) {
-          user.receive(message, from);
-        }
-      });
+      this.broadcast(message, sender);
     }
+  }
+
+  broadcast(message, sender) {
+    this.users.forEach((user) => {
+      if (user !== sender) user.receive({ from: sender?.name || '系统', text: message });
+    });
   }
 }
 
 class User {
-  constructor(name) {
-    this.name = name;
-    this.chatRoom = null;
-    this.messages = [];
-  }
-
-  send(message, to) {
-    console.log(\`\${this.name} 发送: \${message}\`);
-    this.chatRoom.send(message, this.name, to);
-  }
-
-  receive(message, from) {
-    const msg = \`\${from} -> \${this.name}: \${message}\`;
-    this.messages.push(msg);
-    console.log(msg);
+  constructor(name) { this.name = name; this.room = null; this.inbox = []; }
+  send(message, to) { this.room.sendMessage(message, this, to); }
+  receive(msg) {
+    this.inbox.push(msg);
+    console.log(\`[\${this.name}] 收到来自 \${msg.from}: \${msg.text}\`);
   }
 }
 
-const room = new ChatRoom();
+const room = new ChatRoom('技术讨论');
 const alice = new User('Alice');
 const bob = new User('Bob');
-const charlie = new User('Charlie');
-
-room.register(alice);
-room.register(bob);
-room.register(charlie);
-
-alice.send('大家好!');        // 广播
-bob.send('嗨Alice!', 'Alice'); // 私聊`,
+room.join(alice);
+room.join(bob);
+alice.send('大家好!');
+bob.send('你好Alice!', 'Alice');`,
       },
       {
-        title: "表单联动中介者",
+        title: "表单组件中介",
+        difficulty: 3,
         code: `class FormMediator {
   constructor() {
     this.components = {};
+    this.rules = [];
   }
 
   register(name, component) {
@@ -1520,54 +1468,59 @@ bob.send('嗨Alice!', 'Alice'); // 私聊`,
     component.mediator = this;
   }
 
+  addRule(rule) { this.rules.push(rule); }
+
   notify(sender, event, data) {
-    if (sender === 'country' && event === 'change') {
-      this.components.province.updateOptions(data);
-      this.components.city.reset();
-    }
-    if (sender === 'province' && event === 'change') {
-      this.components.city.updateOptions(data);
-    }
-    if (sender === 'orderType' && event === 'change') {
-      this.components.price.setVisible(data === 'paid');
-      this.components.discount.setVisible(data === 'paid');
-    }
+    this.rules.forEach(rule => {
+      if (rule.when(sender, event, data)) {
+        rule.then(this.components, data);
+      }
+    });
   }
 }
 
-class FormSelect {
-  constructor(name) {
+class FormField {
+  constructor(name, value = '') {
     this.name = name;
-    this.value = '';
-    this.options = [];
-    this.visible = true;
+    this.value = value;
+    this.disabled = false;
     this.mediator = null;
   }
-
-  change(value) {
-    this.value = value;
-    console.log(\`\${this.name} 选择了: \${value}\`);
-    this.mediator.notify(this.name, 'change', value);
+  setValue(val) {
+    this.value = val;
+    if (this.mediator) this.mediator.notify(this.name, 'change', val);
   }
-
-  updateOptions(parentValue) {
-    console.log(\`\${this.name} 根据 "\${parentValue}" 更新了选项\`);
-  }
-
-  reset() { this.value = ''; console.log(\`\${this.name} 已重置\`); }
-  setVisible(v) { this.visible = v; console.log(\`\${this.name} 可见性: \${v}\`); }
+  setDisabled(flag) { this.disabled = flag; }
 }
 
 const mediator = new FormMediator();
-const country = new FormSelect('country');
-const province = new FormSelect('province');
-const city = new FormSelect('city');
+const country = new FormField('country');
+const city = new FormField('city');
+const submitBtn = new FormField('submit');
 
 mediator.register('country', country);
-mediator.register('province', province);
 mediator.register('city', city);
+mediator.register('submit', submitBtn);
 
-country.change('中国');`,
+mediator.addRule({
+  when: (sender, event) => sender === 'country' && event === 'change',
+  then: (components, value) => {
+    console.log(\`国家变更为: \${value}，重置城市选项\`);
+    components.city.setValue('');
+  }
+});
+
+mediator.addRule({
+  when: (sender, event) => event === 'change',
+  then: (components) => {
+    const ready = components.country.value && components.city.value;
+    components.submit.setDisabled(!ready);
+    console.log(\`提交按钮: \${ready ? '可用' : '禁用'}\`);
+  }
+});
+
+country.setValue('中国');
+city.setValue('北京');`,
       },
     ],
   },

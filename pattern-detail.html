@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="设计模式详解 - 概念介绍、核心要点与 JavaScript 代码示例。">
   <title>模式详情 - 设计模式侦探</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 </head>
 <body>
   <nav class="navbar">
@@ -13,10 +14,12 @@
       <a href="index.html" class="nav-brand">
         <span class="icon">🔍</span> 设计模式侦探
       </a>
-      <ul class="nav-links">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <ul class="nav-links" id="nav-links">
         <li><a href="index.html">首页</a></li>
         <li><a href="patterns.html" class="active">模式库</a></li>
         <li><a href="game.html">开始挑战</a></li>
+        <li><a href="stats.html">战绩</a></li>
       </ul>
     </div>
   </nav>
@@ -34,6 +37,10 @@
   <script src="js/patterns-data.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script>
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('nav-links').classList.toggle('open');
+    });
+
     function getCategoryClass(category) {
       if (category === '创建型') return 'tag-creational';
       if (category === '结构型') return 'tag-structural';
@@ -44,6 +51,12 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    function getDiffLabel(d) {
+      if (d === 1) return '⭐ 简单';
+      if (d === 2) return '⭐⭐ 中等';
+      return '⭐⭐⭐ 困难';
     }
 
     function renderDetail() {
@@ -58,15 +71,18 @@
       }
 
       document.title = `${pattern.name} - 设计模式侦探`;
+      const meta = document.querySelector('meta[name="description"]');
+      if (meta) meta.content = pattern.description;
 
       const html = `
         <div class="detail-header">
           <a href="patterns.html" style="color:var(--text-muted);font-size:0.9rem;">&larr; 返回模式库</a>
           <div style="margin-top:1rem;">
             <span class="category-tag ${getCategoryClass(pattern.category)}">${pattern.category}</span>
+            <span class="difficulty-tag diff-${pattern.difficulty}">${getDiffLabel(pattern.difficulty)}</span>
           </div>
           <h1>${pattern.name}</h1>
-          <div class="name-en">${pattern.nameEn}</div>
+          <div class="name-en" style="font-size:1.1rem;margin-top:0.25rem;">${pattern.nameEn}</div>
         </div>
 
         <div class="detail-section">

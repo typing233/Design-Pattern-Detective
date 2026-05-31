@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="设计模式侦探 - 通过互动答题游戏学习 JavaScript 设计模式，涵盖14种经典设计模式的概念讲解与代码示例。">
+  <meta property="og:title" content="设计模式侦探 - Design Pattern Detective">
+  <meta property="og:description" content="通过互动游戏掌握 JavaScript 设计模式，阅读代码片段识别设计模式，成为真正的代码侦探！">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
   <title>设计模式侦探 - Design Pattern Detective</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <nav class="navbar">
@@ -12,10 +17,12 @@
       <a href="index.html" class="nav-brand">
         <span class="icon">🔍</span> 设计模式侦探
       </a>
-      <ul class="nav-links">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <ul class="nav-links" id="nav-links">
         <li><a href="index.html" class="active">首页</a></li>
         <li><a href="patterns.html">模式库</a></li>
         <li><a href="game.html">开始挑战</a></li>
+        <li><a href="stats.html">战绩</a></li>
       </ul>
     </div>
   </nav>
@@ -27,6 +34,7 @@
       <a href="game.html" class="btn btn-primary">开始挑战</a>
       <a href="patterns.html" class="btn btn-secondary">浏览模式库</a>
     </div>
+    <div class="hero-stats" id="hero-stats"></div>
   </section>
 
   <section class="features">
@@ -40,18 +48,18 @@
         </div>
         <div class="feature-card">
           <div class="icon">🎮</div>
-          <h3>互动答题游戏</h3>
-          <p>通过阅读真实代码片段来识别设计模式，在实践中加深理解，比死记硬背更有效。</p>
+          <h3>闯关挑战模式</h3>
+          <p>5大难度关卡层层递进，从入门到大师，支持自由模式随机练习。倒计时答题紧张刺激。</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔥</div>
+          <h3>连击与评分</h3>
+          <p>连续答对获得连击加成，最高3倍得分。快速作答有时间奖励分，争夺排行榜榜首！</p>
         </div>
         <div class="feature-card">
           <div class="icon">📊</div>
-          <h3>即时反馈评分</h3>
-          <p>每道题即时反馈正误并给出详细解释，记录得分与正确率，量化你的学习进度。</p>
-        </div>
-        <div class="feature-card">
-          <div class="icon">💻</div>
-          <h3>JavaScript 实战</h3>
-          <p>所有代码示例均为 JavaScript 实现，贴近前端开发者的日常工作场景。</p>
+          <h3>进度存档与统计</h3>
+          <p>自动保存游戏进度，记录每种模式的正确率，查看累计战绩和个人排行榜。</p>
         </div>
       </div>
     </div>
@@ -60,5 +68,25 @@
   <footer class="footer">
     <p>设计模式侦探 &copy; 2024 — 学习设计模式的互动平台</p>
   </footer>
+
+  <script src="js/patterns-data.js"></script>
+  <script src="js/progress.js"></script>
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('nav-links').classList.toggle('open');
+    });
+
+    const profile = ProgressManager.getProfile();
+    const statsEl = document.getElementById('hero-stats');
+    if (profile.totalGames > 0) {
+      const accuracy = ProgressManager.getOverallAccuracy();
+      statsEl.innerHTML = `
+        <div class="hero-stat"><div class="value">${profile.totalGames}</div><div class="label">已完成局数</div></div>
+        <div class="hero-stat"><div class="value">${accuracy}%</div><div class="label">总正确率</div></div>
+        <div class="hero-stat"><div class="value">${profile.bestScore}</div><div class="label">最高分</div></div>
+        <div class="hero-stat"><div class="value">Lv.${profile.levelsUnlocked}</div><div class="label">当前进度</div></div>
+      `;
+    }
+  </script>
 </body>
 </html>

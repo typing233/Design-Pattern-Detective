@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="JavaScript 设计模式库 - 涵盖14种常用设计模式的概念介绍、核心要点和代码示例。">
   <title>设计模式库 - 设计模式侦探</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <nav class="navbar">
@@ -12,10 +13,12 @@
       <a href="index.html" class="nav-brand">
         <span class="icon">🔍</span> 设计模式侦探
       </a>
-      <ul class="nav-links">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <ul class="nav-links" id="nav-links">
         <li><a href="index.html">首页</a></li>
         <li><a href="patterns.html" class="active">模式库</a></li>
         <li><a href="game.html">开始挑战</a></li>
+        <li><a href="stats.html">战绩</a></li>
       </ul>
     </div>
   </nav>
@@ -26,11 +29,18 @@
       <p>涵盖 14 种常用 JavaScript 设计模式，点击卡片查看详情与代码示例</p>
     </div>
 
-    <div class="category-filter" id="category-filter">
+    <div class="filter-bar" id="category-filter">
       <button class="filter-btn active" data-category="all">全部</button>
       <button class="filter-btn" data-category="创建型">创建型</button>
       <button class="filter-btn" data-category="结构型">结构型</button>
       <button class="filter-btn" data-category="行为型">行为型</button>
+    </div>
+
+    <div class="filter-bar" id="difficulty-filter">
+      <button class="filter-btn active" data-difficulty="all">全部难度</button>
+      <button class="filter-btn" data-difficulty="1">⭐ 简单</button>
+      <button class="filter-btn" data-difficulty="2">⭐⭐ 中等</button>
+      <button class="filter-btn" data-difficulty="3">⭐⭐⭐ 困难</button>
     </div>
 
     <div class="pattern-grid" id="pattern-grid"></div>
@@ -42,21 +52,42 @@
 
   <script src="js/patterns-data.js"></script>
   <script>
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('nav-links').classList.toggle('open');
+    });
+
+    let currentCategory = 'all';
+    let currentDifficulty = 'all';
+
     function getCategoryClass(category) {
       if (category === '创建型') return 'tag-creational';
       if (category === '结构型') return 'tag-structural';
       return 'tag-behavioral';
     }
 
-    function renderPatterns(filter = 'all') {
+    function getDifficultyLabel(d) {
+      if (d === 1) return '简单';
+      if (d === 2) return '中等';
+      return '困难';
+    }
+
+    function renderPatterns() {
       const grid = document.getElementById('pattern-grid');
-      const patterns = filter === 'all'
-        ? PATTERNS_DATA
-        : PATTERNS_DATA.filter(p => p.category === filter);
+      let patterns = PATTERNS_DATA;
+
+      if (currentCategory !== 'all') {
+        patterns = patterns.filter(p => p.category === currentCategory);
+      }
+      if (currentDifficulty !== 'all') {
+        patterns = patterns.filter(p => p.difficulty === parseInt(currentDifficulty));
+      }
 
       grid.innerHTML = patterns.map(p => `
         <a href="pattern-detail.html?id=${p.id}" class="pattern-card">
-          <span class="category-tag ${getCategoryClass(p.category)}">${p.category}</span>
+          <div>
+            <span class="category-tag ${getCategoryClass(p.category)}">${p.category}</span>
+            <span class="difficulty-tag diff-${p.difficulty}">${getDifficultyLabel(p.difficulty)}</span>
+          </div>
           <h3>${p.name}</h3>
           <div class="name-en">${p.nameEn}</div>
           <p class="desc">${p.description}</p>
@@ -65,11 +96,19 @@
     }
 
     document.getElementById('category-filter').addEventListener('click', (e) => {
-      if (e.target.classList.contains('filter-btn')) {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        renderPatterns(e.target.dataset.category);
-      }
+      if (!e.target.classList.contains('filter-btn')) return;
+      document.querySelectorAll('#category-filter .filter-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentCategory = e.target.dataset.category;
+      renderPatterns();
+    });
+
+    document.getElementById('difficulty-filter').addEventListener('click', (e) => {
+      if (!e.target.classList.contains('filter-btn')) return;
+      document.querySelectorAll('#difficulty-filter .filter-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentDifficulty = e.target.dataset.difficulty;
+      renderPatterns();
     });
 
     renderPatterns();

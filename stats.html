@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="设计模式侦探 - 查看你的累计战绩、正确率统计和排行榜。">
+  <title>战绩统计 - 设计模式侦探</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <span class="icon">🔍</span> 设计模式侦探
+      </a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="patterns.html">模式库</a></li>
+        <li><a href="game.html">开始挑战</a></li>
+        <li><a href="stats.html" class="active">战绩</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container stats-container">
+    <div class="page-header">
+      <h1>战绩统计</h1>
+      <p>你的设计模式学习进度一览</p>
+    </div>
+
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <h2 class="section-title">排行榜</h2>
+    <table class="leaderboard-table" id="leaderboard-table">
+      <thead>
+        <tr><th>#</th><th>名称</th><th>分数</th><th>日期</th></tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+
+    <h2 class="section-title">各模式正确率</h2>
+    <div class="pattern-stats-list" id="pattern-stats-list"></div>
+
+    <h2 class="section-title">最近游戏记录</h2>
+    <div class="game-history-list" id="game-history-list"></div>
+
+    <div style="text-align:center;padding:2rem 0;">
+      <button class="btn btn-danger" id="reset-btn">重置所有进度</button>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>设计模式侦探 &copy; 2024 — 学习设计模式的互动平台</p>
+  </footer>
+
+  <script src="js/patterns-data.js"></script>
+  <script src="js/progress.js"></script>
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('nav-links').classList.toggle('open');
+    });
+
+    function renderStats() {
+      const profile = ProgressManager.getProfile();
+      const accuracy = ProgressManager.getOverallAccuracy();
+
+      document.getElementById('stats-grid').innerHTML = `
+        <div class="stats-card"><div class="big-value">${profile.totalGames}</div><div class="label">游戏局数</div></div>
+        <div class="stats-card"><div class="big-value">${accuracy}%</div><div class="label">总正确率</div></div>
+        <div class="stats-card"><div class="big-value">${profile.bestScore}</div><div class="label">最高分</div></div>
+        <div class="stats-card"><div class="big-value">${profile.bestStreak}</div><div class="label">最长连击</div></div>
+        <div class="stats-card"><div class="big-value">Lv.${profile.levelsUnlocked}</div><div class="label">已解锁关卡</div></div>
+        <div class="stats-card"><div class="big-value">${profile.totalCorrect}</div><div class="label">总正确题数</div></div>
+      `;
+
+      const board = ProgressManager.getLeaderboard();
+      const tbody = document.getElementById('leaderboard-body');
+      if (board.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">暂无记录，去挑战一局吧！</td></tr>';
+      } else {
+        tbody.innerHTML = board.map((item, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${item.name}</td>
+            <td style="font-weight:700;color:var(--secondary);">${item.score}</td>
+            <td style="color:var(--text-muted);">${new Date(item.date).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      }
+
+      const patternStats = ProgressManager.getPatternAccuracy();
+      const psList = document.getElementById('pattern-stats-list');
+      if (patternStats.length === 0) {
+        psList.innerHTML = '<p style="color:var(--text-muted);text-align:center;">暂无数据</p>';
+      } else {
+        psList.innerHTML = patternStats.map(s => {
+          const color = s.accuracy >= 70 ? 'var(--success)' : s.accuracy >= 40 ? 'var(--warning)' : 'var(--danger)';
+          return `
+            <div class="pattern-stat-item">
+              <span class="name">${s.name}</span>
+              <div class="bar-container">
+                <div class="bar-fill" style="width:${s.accuracy}%;background:${color};"></div>
+              </div>
+              <span class="pct" style="color:${color};">${s.accuracy}%</span>
+            </div>`;
+        }).join('');
+      }
+
+      const history = ProgressManager.getHistory();
+      const histList = document.getElementById('game-history-list');
+      if (history.length === 0) {
+        histList.innerHTML = '<p style="color:var(--text-muted);text-align:center;">暂无游戏记录</p>';
+      } else {
+        histList.innerHTML = history.slice(0, 20).map(h => `
+          <div class="game-history-item">
+            <span class="date">${new Date(h.date).toLocaleDateString()}</span>
+            <span>${h.mode === 'level' ? '关卡' + h.level : '自由模式'}</span>
+            <span style="font-weight:600;color:var(--secondary);">${h.score}分</span>
+            <span>${h.correct}/${h.total} (${h.accuracy}%)</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      if (confirm('确定要重置所有进度吗？此操作不可恢复！')) {
+        ProgressManager.resetProgress();
+        renderStats();
+      }
+    });
+
+    renderStats();
+  </script>
+</body>
+</html>
